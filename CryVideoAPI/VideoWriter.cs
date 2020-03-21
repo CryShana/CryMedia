@@ -27,7 +27,7 @@ namespace CryVideoAPI
         /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public VideoWriter(string filename, int width, int height, double framerate, 
-            FFmpegEncoderOptions encoderOptions, string ffmpegExecutable = "ffmpeg")
+            FFmpegEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
         {
             if (width <= 0 || height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
             if (framerate <= 0) throw new InvalidDataException("Video framerate has to be bigger than 0!");
@@ -38,7 +38,7 @@ namespace CryVideoAPI
             Height = height;
             Filename = filename;
             Framerate = framerate;
-            EncoderOptions = encoderOptions;            
+            EncoderOptions = encoderOptions ?? new FFmpegEncoderOptions();            
         }
 
         /// <summary>

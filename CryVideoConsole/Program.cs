@@ -18,7 +18,7 @@ namespace CryVideoConsole
             video.LoadMetadata().Wait();
             video.Load();
 
-            using (var writer = new VideoWriter(output, video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate, new FFmpegEncoderOptions()))
+            using (var writer = new VideoWriter(output, video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate))
             {
                 writer.OpenForWriting(true);
 
@@ -29,6 +29,7 @@ namespace CryVideoConsole
                     var f = video.NextFrame(frame);
                     if (f == null) break;
 
+                    
                     for (int i = 0; i < 100; i++)
                         for (int j = 0; j < 100; j++)
                         {
