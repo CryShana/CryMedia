@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryVideoAPI", "CryVideoAPI\CryVideoAPI.csproj", "{4A5AAC4D-BF24-47AA-B1DA-65B2497179F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryVideoConsole", "CryVideoConsole\CryVideoConsole.csproj", "{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A5AAC4D-BF24-47AA-B1DA-65B2497179F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A5AAC4D-BF24-47AA-B1DA-65B2497179F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A5AAC4D-BF24-47AA-B1DA-65B2497179F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A5AAC4D-BF24-47AA-B1DA-65B2497179F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9E96A6DF-482B-4F4C-A57A-9646B328BA61}
+	EndGlobalSection
+EndGlobal
