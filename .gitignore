@@ -1,0 +1,6 @@
+.vs
+CryVideoAPI/bin
+CryVideoAPI/obj
+CryVideoConsole/bin
+CryVideoConsole/obj
+CryVideoConsole/Properties/launchSettings.json
