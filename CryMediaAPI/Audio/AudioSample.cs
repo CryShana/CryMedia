@@ -17,11 +17,12 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Creates an empty audio frame with given dimensions using the RGB24 pixel format.
         /// </summary>
-        public AudioSample(int channels, int depthBytes = 2)
+        public AudioSample(int channels, int bitDepth = 16)
         {
-            if (channels <= 0 || depthBytes <= 0) throw new InvalidDataException("Channel and depth count has to be bigger than 0!");
+            if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
+            if (channels <= 0) throw new InvalidDataException("Channel count has to be bigger than 0!");
 
-            this.depthBytes = depthBytes;
+            this.depthBytes = bitDepth / 8;
             size = channels * depthBytes;
             frameBuffer = new byte[size];
             RawData = frameBuffer.AsMemory();
