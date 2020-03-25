@@ -1,6 +1,7 @@
 .vs
-CryVideoAPI/bin
-CryVideoAPI/obj
+CryMediaAPI/bin
+CryMediaAPI/obj
 CryVideoConsole/bin
 CryVideoConsole/obj
 CryVideoConsole/Properties/launchSettings.json
+CryMediaAPI/Properties/PublishProfiles/

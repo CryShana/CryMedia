@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace CryVideoAPI.Models
+namespace CryMediaAPI.Video.Models
 {
     public class VideoMetadata
     {

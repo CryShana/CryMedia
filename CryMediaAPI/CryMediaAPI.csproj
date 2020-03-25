@@ -4,4 +4,8 @@
     <TargetFramework>netcoreapp5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Audio\" />
+  </ItemGroup>
+
 </Project>

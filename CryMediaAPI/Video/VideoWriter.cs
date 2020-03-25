@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace CryVideoAPI
+namespace CryMediaAPI.Video
 {
     public class VideoWriter : IDisposable
     {

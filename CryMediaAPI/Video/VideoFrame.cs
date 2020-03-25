@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace CryVideoAPI
+namespace CryMediaAPI.Video
 {
     /// <summary>
     /// Video frame containing pixel data in RGB24 format.
