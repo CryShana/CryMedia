@@ -62,7 +62,7 @@ namespace CryMediaAPI.Audio
         /// <param name="channels">Number of channels</param>
         /// <param name="bitDepth">Bits per sample (16, 24, 32)</param>
         /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
-        public void OpenWrite(int sampleRate, int channels, int bitDepth, bool showFFplayOutput = false)
+        public void OpenWrite(int sampleRate, int channels, int bitDepth = 16, bool showFFplayOutput = false)
         {
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
             if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");

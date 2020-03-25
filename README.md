@@ -8,7 +8,7 @@ A .NET library that offers a simple interface for reading, writing and playing v
 
 These executables should either be available in the PATH env. variable or should be specified manually.
 
-## Usage
+## Video Usage
 ### Reading video metadata
 ```csharp
 // reading video file
@@ -87,7 +87,68 @@ var writer = new VideoWriter("out.mp4", w, h, fps, options);
 var player = new VideoPlayer("video.mp4");
 player.Play();
 ```
+### Playing video frames directly
+```csharp
+var player = new VideoPlayer();
+player.OpenWrite(video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerateText);
 
+// play frame... (usually you would have this in a loop)
+player.WriteFrame(frame);
+
+// dispose manually or use 'using' statement
+player.Dispose();
+```
+---
+## Audio Usage
+### Reading audio metadata
+```csharp
+// reading audio file
+var audio = new AudioReader("test.mp3");
+
+// load metadata
+await audio.LoadMetadata();
+
+// example metadata that you can get
+var channels = audio.Metadata.Channels;
+var samplerate = audio.Metadata.SampleRate;
+var codec = audio.Metadata.Codec;
+var duration = audio.Metadata.Duration;
+```
+### Reading and modifying audio samples
+```csharp
+// open audio for reading samples
+audio.Load();
+// audio.Load(24); // <-- you can specify bit-depth (16, 24, 32)
+
+// read next frame (in RGB24 format)
+var sample = audio.NextSample();
+
+// get value from first channel (index 0)
+var value = sample.GetValue(0).Span;
+
+// set values (default bit-depth is 16 = 2 bytes)
+px[0] = 124;
+px[1] = 23;
+```
+
+### Playing audio files
+```csharp
+var player = new AudioPlayer("audio.mp3");
+player.Play();
+```
+
+### Playing audio samples directly
+```csharp
+var player = new AudioPlayer();
+player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels);
+
+// play sample... (usually you would have this in a loop)
+player.WriteSample(sample);
+
+// dispose manually or use 'using' statement
+player.Dispose();
+```
+###
 ## Development
 This is a personal project. I might add more features in the future.
 
