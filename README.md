@@ -8,6 +8,14 @@ A cross-platform .NET library that offers a simple interface for reading, writin
 
 These executables should either be available in the PATH env. variable or should be specified manually.
 
+## Install
+```
+dotnet add package CryMediaAPI
+```
+
+(Requires .NET Core 3.1) For older versions I recommend downloading the code from here and using it directly.
+For even older versions, you might have to replace the JSON serializer and adjust the syntax.
+
 ## Video Usage
 ### Reading video metadata
 ```csharp
