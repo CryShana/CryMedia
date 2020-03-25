@@ -15,21 +15,21 @@ namespace CryMediaAPI.Video
         public int Width { get; }
         public int Height { get; }
         public double Framerate { get; }
-        public FFmpegEncoderOptions EncoderOptions { get; }
+        public FFmpegVideoEncoderOptions EncoderOptions { get; }
 
         public string Filename { get; }
 
         /// <summary>
-        /// Used for encoding frames into new video files
+        /// Used for encoding frames into a new video file
         /// </summary>
         /// <param name="filename">Output video file name/path</param>
-        /// <param name="width">Width of the input video in pixels</param>
-        /// <param name="height">Height of the input video in pixels </param>
-        /// <param name="framerate">Framerate of the input video in fps</param>
+        /// <param name="width">Input width of the video in pixels</param>
+        /// <param name="height">Input height of the video in pixels </param>
+        /// <param name="framerate">Input framerate of the video in fps</param>
         /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public VideoWriter(string filename, int width, int height, double framerate,
-            FFmpegEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
+            FFmpegVideoEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
         {
             if (width <= 0 || height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
             if (framerate <= 0) throw new InvalidDataException("Video framerate has to be bigger than 0!");
@@ -40,7 +40,7 @@ namespace CryMediaAPI.Video
             Height = height;
             Filename = filename;
             Framerate = framerate;
-            EncoderOptions = encoderOptions ?? new FFmpegEncoderOptions();
+            EncoderOptions = encoderOptions ?? new FFmpegVideoEncoderOptions();
         }
 
         /// <summary>
@@ -100,9 +100,9 @@ namespace CryMediaAPI.Video
     }
 
     /// <summary>
-    /// FFmpeg encoding options to pass to FFmpeg when encoding. Check the online FFmpeg documentation for more info.
+    /// FFmpeg video encoding options to pass to FFmpeg when encoding. Check the online FFmpeg documentation for more info.
     /// </summary>
-    public class FFmpegEncoderOptions
+    public class FFmpegVideoEncoderOptions
     {
         /// <summary>
         /// Container format. (example: 'mp4', 'flv', 'webm')
