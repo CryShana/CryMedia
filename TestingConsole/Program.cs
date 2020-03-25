@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using CryMediaAPI.Video;
 
-namespace CryVideoConsole
+namespace TestingConsole    
 {
     class Program
     {
