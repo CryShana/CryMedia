@@ -58,9 +58,13 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Open player for writing frames for playing.
         /// </summary>
+        /// <param name="sampleRate">Sample rate</param>
+        /// <param name="channels">Number of channels</param>
+        /// <param name="bitDepth">Bits per sample (16, 24, 32)</param>
         /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
-        public void OpenWrite(bool showFFplayOutput = false)
+        public void OpenWrite(int sampleRate, int channels, int bitDepth, bool showFFplayOutput = false)
         {
+            if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
             if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
             try
             {
@@ -68,7 +72,9 @@ namespace CryMediaAPI.Audio
             }
             catch { }
 
-            throw new NotImplementedException();
+            input = FFmpegWrapper.OpenInput(ffplay, $"-f s{bitDepth}le -channels {channels} -sample_rate {sampleRate} -i -" 
+                + (showFFplayOutput ? "" : " -showmode 0"), 
+                out ffplayp, showFFplayOutput);
 
             outOpened = true;
         }
@@ -97,10 +103,10 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Write frame to FFplay to play it.
+        /// Write audio sample to FFplay to play it.
         /// </summary>
         /// <param name="frame">Audio frame to write to player</param>
-        public void WriteFrame(AudioFrame frame)
+        public void WriteSample(AudioSample frame)
         {
             if (!outOpened) throw new InvalidOperationException("Player not opened for writing frames!");
 
