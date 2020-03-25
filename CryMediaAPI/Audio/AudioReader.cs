@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CryMediaAPI.Audio.Models;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace CryMediaAPI.Audio
 {
@@ -13,6 +14,7 @@ namespace CryMediaAPI.Audio
     {
         Stream audioStream;
         string ffmpeg, ffprobe;
+        int loadedBitDepth = 16;
         bool loadedAudio = false;
         bool loadedMetadata = false;
 
@@ -59,6 +61,17 @@ namespace CryMediaAPI.Audio
                         metadata.Duration = double.Parse(audioStream.Duration);
                         metadata.BitRate = audioStream.BitRate == null ? -1 : int.Parse(audioStream.BitRate);
                         metadata.BitDepth = audioStream.BitsPerSample;
+                        metadata.PredictedSampleCount = (int)Math.Round(metadata.Duration * metadata.SampleRate);
+
+                        if (metadata.BitDepth == 0)
+                        {
+                            // try to parse it from format
+                            if (metadata.SampleFormat.Contains("64")) metadata.BitDepth = 64;
+                            else if (metadata.SampleFormat.Contains("32")) metadata.BitDepth = 32;
+                            else if (metadata.SampleFormat.Contains("24")) metadata.BitDepth = 24;
+                            else if (metadata.SampleFormat.Contains("16")) metadata.BitDepth = 16;
+                            else if (metadata.SampleFormat.Contains("8")) metadata.BitDepth = 8;
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -79,38 +92,39 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Load the audio and prepare it for reading frames.
         /// </summary>
-        public void Load()
+        /// <param name="bitDepth">Sample bit rate in which the audio will be processed (16, 24, 32)</param>
+        public void Load(int bitDepth = 16)
         {
+            if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
             if (loadedAudio) throw new InvalidOperationException("Audio is already loaded!");
             if (!loadedMetadata) throw new InvalidOperationException("Please load the audio metadata first!");
             //if (Metadata.Width == 0 || Metadata.Height == 0) throw new InvalidDataException("Loaded metadata contains errors!");
 
-            // we will be reading video in RGB24 format
-            audioStream = FFmpegWrapper.OpenOutput(ffmpeg, $"-i \"{Filename}\" -pix_fmt rgb24 -f rawvideo -");
+            // we will be reading audio in S16LE format (for best accuracy, could use S32LE)
+            audioStream = FFmpegWrapper.OpenOutput(ffmpeg, $"-i \"{Filename}\" -f s{bitDepth}le -");
+            loadedBitDepth = bitDepth;
             loadedAudio = true;
         }
 
         /// <summary>
-        /// Loads the next audio frame into memory and returns it. This allocates a new frame.
-        /// Returns 'null' when there is no next frame.
+        /// Loads the next audio sample into memory and returns it. This allocates a new sample.
+        /// Returns 'null' when there is no next sample.
         /// </summary>
-        public AudioFrame NextFrame()
+        public AudioSample NextSample()
         {
             if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
 
-            throw new NotImplementedException();
-
-            var frame = new AudioFrame();
+            var frame = new AudioSample(Metadata.Channels, loadedBitDepth / 8);
             var success = frame.Load(audioStream);
             return success ? frame : null;
         }
 
         /// <summary>
-        /// Loads the next audio frame into memory and returns it. This overrides the given frame with no extra allocations. Recommended for performance.
-        /// Returns 'null' when there is no next frame.
+        /// Loads the next audio sample into memory and returns it. This overrides the given sample with no extra allocations. Recommended for performance.
+        /// Returns 'null' when there is no next sample.
         /// </summary>
-        /// <param name="frame">Existing frame to be overwritten with new frame data.</param>
-        public AudioFrame NextFrame(AudioFrame frame)
+        /// <param name="frame">Existing sample to be overwritten with new frame data.</param>
+        public AudioSample NextSample(AudioSample frame)
         {
             if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
 

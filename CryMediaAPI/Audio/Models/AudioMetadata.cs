@@ -44,7 +44,9 @@ namespace CryMediaAPI.Audio.Models
         /// <summary>
         /// Bits per sample
         /// </summary>
-        public long BitDepth { get; set; }
+        public int BitDepth { get; set; }
+
+        public long PredictedSampleCount { get; set; }
 
 
         [JsonPropertyName("streams")]
@@ -116,13 +118,13 @@ namespace CryMediaAPI.Audio.Models
         public string SampleRate { get; set; }
 
         [JsonPropertyName("channels")]
-        public long Channels { get; set; }
+        public int Channels { get; set; }
 
         [JsonPropertyName("channel_layout")]
         public string ChannelLayout { get; set; }
 
         [JsonPropertyName("bits_per_sample")]
-        public long BitsPerSample { get; set; }
+        public int BitsPerSample { get; set; }
 
         [JsonPropertyName("r_frame_rate")]
         public string RFrameRate { get; set; }
