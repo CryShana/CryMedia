@@ -1,5 +1,5 @@
 # CryMedia
-A .NET library that offers a simple interface for reading, writing and playing video and audio files using FFmpeg.
+A cross-platform .NET library that offers a simple interface for reading, writing and playing video and audio files using FFmpeg.
 
 ## Requirements
 - **FFmpeg** executable for reading and writing video/audio data
@@ -120,7 +120,7 @@ var duration = audio.Metadata.Duration;
 audio.Load();
 // audio.Load(24); // <-- you can specify bit-depth (16, 24, 32)
 
-// read next frame (in RGB24 format)
+// read next frame (in S16LE format - depends on used bit-depth)
 var sample = audio.NextSample();
 
 // get value from first channel (index 0)
