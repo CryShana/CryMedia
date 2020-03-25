@@ -34,18 +34,25 @@ namespace CryMediaAPI.Audio
         /// </summary>
         public void Play(bool showWindow = false)
         {
+            if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
+
             FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -showmode 0"));
         }
 
         /// <summary>
         /// Play audio in background and return the process associated with it
         /// </summary>
-        public Process PlayInBackground(bool showWindow = false)
+        /// <param name="showWindow">Show player window</param>
+        /// <param name="runPureBackground">Detach the player from this AudioPlayer control. Player won't be killed on disposing.</param>
+        public Process PlayInBackground(bool showWindow = false, bool runPureBackground = false)
         {
+            if (!runPureBackground && outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
+
             FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -showmode 0"), out Process p);
-            return p;
+            if (!runPureBackground) ffplayp = p;
+            return ffplayp;
         }
 
         /// <summary>
@@ -55,6 +62,11 @@ namespace CryMediaAPI.Audio
         public void OpenWrite(bool showFFplayOutput = false)
         {
             if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
+            try
+            {
+                if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
+            }
+            catch { }
 
             throw new NotImplementedException();
 
@@ -98,6 +110,15 @@ namespace CryMediaAPI.Audio
         public void Dispose()
         {
             if (outOpened) CloseWrite();
+            else
+            {
+                try
+                {
+                    if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
+
+                }
+                catch { }               
+            }
         }
     }
 }

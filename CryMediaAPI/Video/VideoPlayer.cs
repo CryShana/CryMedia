@@ -30,18 +30,24 @@ namespace CryMediaAPI.Video
         /// </summary>
         public void Play()
         {
+            if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
+
             FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"");
         }
 
         /// <summary>
         /// Play video in background and return the process associated with it
         /// </summary>
-        public Process PlayInBackground()
+        /// <param name="runPureBackground">Detach the player from this VideoPlayer control. Player won't be killed on disposing.</param>
+        public Process PlayInBackground(bool runPureBackground = false)
         {
+            if (!runPureBackground && outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
+
             FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"", out Process p);
-            return p;
+            if (!runPureBackground) ffplayp = p;
+            return ffplayp;
         }
 
         /// <summary>
@@ -54,6 +60,11 @@ namespace CryMediaAPI.Video
         public void OpenWrite(int width, int height, string framerateFrequency, bool showFFplayOutput = false)
         {
             if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
+            try
+            {
+                if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
+            }
+            catch { }
 
             input = FFmpegWrapper.OpenInput(ffplay, $"-f rawvideo -video_size {width}:{height} -framerate {framerateFrequency} -pixel_format rgb24 -i -",
                 out ffplayp, showFFplayOutput);
@@ -76,12 +87,12 @@ namespace CryMediaAPI.Video
                 }
                 catch { }
 
-                input.Dispose();              
+                input.Dispose();
             }
             finally
             {
                 outOpened = false;
-            }         
+            }
         }
 
         /// <summary>
@@ -98,6 +109,14 @@ namespace CryMediaAPI.Video
         public void Dispose()
         {
             if (outOpened) CloseWrite();
+            else
+            {
+                try
+                {
+                    if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
+                }
+                catch { }
+            }
         }
     }
 }
