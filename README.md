@@ -120,7 +120,7 @@ var duration = audio.Metadata.Duration;
 audio.Load();
 // audio.Load(24); // <-- you can specify bit-depth (16, 24, 32)
 
-// read next frame (in S16LE format - depends on used bit-depth)
+// read next sample (in S16LE format - depends on used bit-depth)
 var sample = audio.NextSample();
 
 // get value from first channel (index 0)
