@@ -24,35 +24,24 @@ namespace TestingConsole
 
         static void ReadWriteAudio(string input, string output)
         {
-            var video = new AudioReader(input);
-            video.LoadMetadata().Wait();
-            video.Load();
+            var audio = new AudioReader(input);
+            audio.LoadMetadata().Wait();
+            audio.Load();
 
-            /*
-            using (var writer = new VideoWriter(output, video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate))
+            using (var writer = new AudioWriter(output, audio.Metadata.Channels, audio.Metadata.SampleRate))
             {
-                writer.OpenWrite(false);
+                writer.OpenWrite(true);
 
-                var frame = new VideoFrame(video.Metadata.Width, video.Metadata.Height);
+                var sample = new AudioSample(audio.Metadata.Channels);
                 while (true)
                 {
-                    // read next frame
-                    var f = video.NextFrame(frame);
+                    // read next sample
+                    var f = audio.NextSample(sample);
                     if (f == null) break;
 
-
-                    for (int i = 0; i < 100; i++)
-                        for (int j = 0; j < 100; j++)
-                        {
-                            var px = frame.GetPixels(i, j).Span;
-                            px[0] = 255;
-                            px[1] = 0;
-                            px[2] = 0;
-                        }
-
-                    writer.WriteFrame(frame);
+                    writer.WriteSample(sample);
                 }
-            }*/
+            }
         }
 
         static void ReadWriteVideo(string input, string output)
@@ -136,9 +125,9 @@ namespace TestingConsole
 
             using (var player = new AudioPlayer())
             {
-                player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels, 16);
+                player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels);
 
-                var sample = new AudioSample(audio.Metadata.Channels, 16);
+                var sample = new AudioSample(audio.Metadata.Channels);
                 while (true)
                 {
                     // read next frame
