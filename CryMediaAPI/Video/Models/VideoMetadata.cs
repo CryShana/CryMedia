@@ -12,6 +12,11 @@ namespace CryMediaAPI.Video.Models
         public string PixelFormat { get; set; }
 
         /// <summary>
+        /// Video codec (long name)
+        /// </summary>
+        public string CodecLongName { get; set; }
+
+        /// <summary>
         /// Video codec
         /// </summary>
         public string Codec { get; set; }
@@ -63,7 +68,7 @@ namespace CryMediaAPI.Video.Models
         /// Media streams inside the video file. Can contain non-video streams as well.
         /// </summary>
         [JsonPropertyName("streams")]
-        public MediaStream[] Streams { get; set; }
+        public VideoStream[] Streams { get; set; }
 
         /// <summary>
         /// Video file format information.
@@ -126,7 +131,7 @@ namespace CryMediaAPI.Video.Models
         public string Encoder { get; set; }
     }
 
-    public class MediaStream
+    public class VideoStream
     {
         [JsonPropertyName("index")]
         public long Index { get; set; }
