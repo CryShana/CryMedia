@@ -44,7 +44,7 @@ px[2] = 0;
 using (var writer = new VideoWriter("out.mp4", width, height, fps)
 {
     // open video for writing
-    writer.OpenForWriting();
+    writer.OpenWrite();
 
     while (true)
     {
@@ -72,7 +72,7 @@ You can customize the encoding options that will be passed to FFmpeg.
 
 ```csharp
 // this is the default encoder
-var options = new FFmpegEncoderOptions()
+var options = new FFmpegVideoEncoderOptions()
 {
     Format = "mp4",
     EncoderName = "libx264",
@@ -98,7 +98,7 @@ player.WriteFrame(frame);
 // dispose manually or use 'using' statement
 player.Dispose();
 ```
----
+
 ## Audio Usage
 ### Reading audio metadata
 ```csharp
@@ -124,11 +124,48 @@ audio.Load();
 var sample = audio.NextSample();
 
 // get value from first channel (index 0)
-var value = sample.GetValue(0).Span;
+var val = sample.GetValue(0).Span;
 
 // set values (default bit-depth is 16 = 2 bytes)
-px[0] = 124;
-px[1] = 23;
+val[0] = 124;
+val[1] = 23;
+```
+### Writing audio samples
+```csharp
+using (var writer = new AudioWriter("out.mp3", channels, sample_rate, 16)
+{
+    // open audio for writing
+    writer.OpenWrite();
+
+    while (true)
+    {
+        // read next sample (using AudioReader)
+        var f = audio.NextSample(sample);
+        if (f == null) break;
+
+        // modify sample in first channel
+        var val = sample.GetValue(0).Span;
+        val[0] = 122;
+        val[1] = 23;
+
+        // write the modified sample
+        writer.WriteFrame(sample);
+    }
+}
+```
+### Custom encoding options
+
+```csharp
+// this is the default encoder
+var options = new FFmpegAudioEncoderOptions()
+{
+    Format = "mp3",
+    EncoderName = "libmp3lame",
+    EncoderArguments = "-ar 44100 -ac 2 -b:a 192k"
+};
+
+// pass options to AudioWriter
+var writer = new AudioWriter("out.mp3", channels, sample_rate, 16, options);
 ```
 
 ### Playing audio files
@@ -148,7 +185,9 @@ player.WriteSample(sample);
 // dispose manually or use 'using' statement
 player.Dispose();
 ```
-###
+## FFmpeg Wrapper
+For specialized needs, you can use the FFmpeg wrapper functions directly using the `FFmpegWrapper` static class.
+
 ## Development
 This is a personal project. I might add more features in the future.
 
