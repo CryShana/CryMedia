@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace CryMediaAPI.Video
 {
@@ -25,6 +26,15 @@ namespace CryMediaAPI.Video
         public void Play()
         {
             FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"");
+        }
+
+        /// <summary>
+        /// Play video in background and return the process associated with it
+        /// </summary>
+        public Process PlayInBackground()
+        {
+            FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"", out Process p);
+            return p;
         }
     }
 }
