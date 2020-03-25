@@ -1,10 +1,12 @@
-# CryVideo
-A .NET library that offers a simple interface for reading and writing video files using FFmpeg.
+# CryMedia
+A .NET library that offers a simple interface for reading, writing and playing video and audio files using FFmpeg.
 
 ## Requirements
-- **FFmpeg** executable (available in PATH or can specify the path manually)
-- **FFprobe** executable for reading video metadata
+- **FFmpeg** executable for reading and writing video/audio data
+- **FFprobe** executable for reading video/audio metadata
+- **FFplay** executable for playing video/audio data
 
+These executables should either be available in the PATH env. variable or should be specified manually.
 
 ## Usage
 ### Reading video metadata
@@ -79,6 +81,11 @@ var options = new FFmpegEncoderOptions()
 
 // pass options to VideoWriter
 var writer = new VideoWriter("out.mp4", w, h, fps, options);
+```
+### Playing video files
+```csharp
+var player = new VideoPlayer("video.mp4");
+player.Play();
 ```
 
 ## Development
