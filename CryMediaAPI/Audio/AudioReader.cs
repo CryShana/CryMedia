@@ -114,7 +114,7 @@ namespace CryMediaAPI.Audio
         {
             if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
 
-            var frame = new AudioSample(Metadata.Channels, loadedBitDepth / 8);
+            var frame = new AudioSample(Metadata.Channels, loadedBitDepth);
             var success = frame.Load(audioStream);
             return success ? frame : null;
         }
