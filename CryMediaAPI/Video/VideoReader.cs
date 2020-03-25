@@ -54,8 +54,8 @@ namespace CryMediaAPI.Video
                         metadata.PixelFormat = videoStream.PixFmt;
                         metadata.Codec = videoStream.CodecName;
                         metadata.CodecLongName = videoStream.CodecLongName;
-                        metadata.BitRate = int.Parse(videoStream.BitRate);
-                        metadata.BitDepth = int.Parse(videoStream.BitsPerRawSample);
+                        metadata.BitRate = videoStream.BitRate == null ? -1 : int.Parse(videoStream.BitRate);
+                        metadata.BitDepth = videoStream.BitsPerRawSample == null ? -1 : int.Parse(videoStream.BitsPerRawSample);
                         metadata.Duration = double.Parse(videoStream.Duration);
                         metadata.SampleAspectRatio = videoStream.SampleAspectRatio;
                         metadata.AvgFramerateText = videoStream.AvgFrameRate;

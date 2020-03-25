@@ -4,7 +4,7 @@ using System.IO;
 namespace CryMediaAPI.Audio
 {
     /// <summary>
-    /// Video frame containing pixel data in RGB24 format.
+    /// Audio frame containing sample data in RGB24 format.
     /// </summary>
     public class AudioFrame : IDisposable
     {
@@ -13,22 +13,15 @@ namespace CryMediaAPI.Audio
         byte[] frameBuffer;
         public Memory<byte> RawData { get; }
 
-        public int Width { get; }
-        public int Height { get; }
 
         /// <summary>
-        /// Creates an empty video frame with given dimensions using the RGB24 pixel format.
+        /// Creates an empty audio frame with given dimensions using the RGB24 pixel format.
         /// </summary>
-        /// <param name="w">Width in pixels</param>
-        /// <param name="h">Height in pixels</param>
-        public AudioFrame(int w, int h)
+        public AudioFrame()
         {
-            if (w <= 0 || h <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
+            //if (w <= 0 || h <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
 
-            Width = w;
-            Height = h;
-
-            size = Width * Height * 3;
+            //size = Width * Height * 3;
             frameBuffer = new byte[size];
             RawData = frameBuffer.AsMemory();
         }
@@ -59,7 +52,7 @@ namespace CryMediaAPI.Audio
         /// <param name="length">Number of pixels to return from the starting pixel</param>
         public Memory<byte> GetPixels(int x, int y, int length = 1) 
         {
-            int index = (x + y * Width) * 3;
+            int index = 3;
             return RawData.Slice(index, length * 3);
         }
 
