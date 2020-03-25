@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Diagnostics;
 
 namespace CryMediaAPI.Video
 {
@@ -8,6 +9,7 @@ namespace CryMediaAPI.Video
         string ffmpeg;
 
         Stream input;
+        Process ffmpegp;
         bool outOpened = false;
 
         public int Width { get; }
@@ -26,7 +28,7 @@ namespace CryMediaAPI.Video
         /// <param name="framerate">Framerate of the input video in fps</param>
         /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public VideoWriter(string filename, int width, int height, double framerate, 
+        public VideoWriter(string filename, int width, int height, double framerate,
             FFmpegEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
         {
             if (width <= 0 || height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
@@ -38,26 +40,50 @@ namespace CryMediaAPI.Video
             Height = height;
             Filename = filename;
             Framerate = framerate;
-            EncoderOptions = encoderOptions ?? new FFmpegEncoderOptions();            
+            EncoderOptions = encoderOptions ?? new FFmpegEncoderOptions();
         }
 
         /// <summary>
-        /// Opens output video file for writing. This will delete any existing file.
+        /// Opens output video file for writing. This will delete any existing file. Call this before writing frames.
         /// </summary>
         /// <param name="showFFmpegOutput">Show FFmpeg encoding output for debugging purposes.</param>
-        public void OpenForWriting(bool showFFmpegOutput = false)
+        public void OpenWrite(bool showFFmpegOutput = false)
         {
-            if (outOpened) throw new InvalidOperationException("Filename was already opened for writing!");
+            if (outOpened) throw new InvalidOperationException("File was already opened for writing!");
             if (File.Exists(Filename)) File.Delete(Filename);
 
             input = FFmpegWrapper.OpenInput(ffmpeg, $"-f rawvideo -video_size {Width}:{Height} -r {Framerate} -pixel_format rgb24 -i - " +
-                $"-c:v {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format} \"{Filename}\"", showFFmpegOutput);
+                $"-c:v {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format} \"{Filename}\"",
+                out ffmpegp, showFFmpegOutput);
 
             outOpened = true;
         }
 
         /// <summary>
-        /// Encode the video frame
+        /// Closes output video file.
+        /// </summary>
+        public void CloseWrite()
+        {
+            if (!outOpened) throw new InvalidOperationException("File is not opened for writing!");
+
+            try
+            {
+                try
+                {
+                    if (ffmpegp.HasExited) ffmpegp.Kill();
+                }
+                catch { }
+
+                input.Dispose();
+            }
+            finally
+            {
+                outOpened = false;
+            }
+        }
+
+        /// <summary>
+        /// Encode the video frame.
         /// </summary>
         /// <param name="frame">Video frame to encode</param>
         public void WriteFrame(VideoFrame frame)
@@ -69,7 +95,7 @@ namespace CryMediaAPI.Video
 
         public void Dispose()
         {
-            input.Dispose();
+            if (outOpened) CloseWrite();
         }
     }
 
