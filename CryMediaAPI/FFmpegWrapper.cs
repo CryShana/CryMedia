@@ -4,8 +4,17 @@ using System.Diagnostics;
 
 namespace CryMediaAPI
 {
-    internal static class FFmpegWrapper
+    /// <summary>
+    /// FFmpeg wrapper
+    /// </summary>
+    public static class FFmpegWrapper
     {
+        /// <summary>
+        /// Run given command (arguments) using the given executable name or path
+        /// </summary>
+        /// <param name="executable">Executable name or path</param>
+        /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
+        /// <param name="prettify">Add new lines to output/error.</param>
         public static (string output, string error) RunCommand(string executable, string command, bool prettify = true)
         {
             var p = Process.Start(new ProcessStartInfo
