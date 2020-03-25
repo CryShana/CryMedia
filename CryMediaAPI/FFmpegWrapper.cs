@@ -28,9 +28,9 @@ namespace CryMediaAPI
             return (output, error);
         }
 
-        public static Stream OpenOutput(string executable, string command)
+        public static Stream OpenOutput(string executable, string command, out Process process)
         {
-            var p = Process.Start(new ProcessStartInfo
+            process = Process.Start(new ProcessStartInfo
             {
                 FileName = executable,
                 UseShellExecute = false,
@@ -40,14 +40,15 @@ namespace CryMediaAPI
                 Arguments = $"{command}"
             });
 
-            p.BeginErrorReadLine();
+            process.BeginErrorReadLine();
 
-            return p.StandardOutput.BaseStream;
+            return process.StandardOutput.BaseStream;
         }
+        public static Stream OpenOutput(string executable, string command) => OpenOutput(executable, command, out _);
 
-        public static Stream OpenInput(string executable, string command, bool showOutput = false)
+        public static Stream OpenInput(string executable, string command, out Process process, bool showOutput = false)
         {
-            var p = Process.Start(new ProcessStartInfo
+            process = Process.Start(new ProcessStartInfo
             {
                 FileName = executable,
                 UseShellExecute = false,
@@ -60,11 +61,12 @@ namespace CryMediaAPI
 
             if (!showOutput)
             {
-                p.BeginErrorReadLine();
-                p.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+                process.BeginOutputReadLine();
             }
 
-            return p.StandardInput.BaseStream;
+            return process.StandardInput.BaseStream;
         }
+        public static Stream OpenInput(string executable, string command, bool showOutput = false) => OpenInput(executable, command, out _, showOutput);        
     }
 }

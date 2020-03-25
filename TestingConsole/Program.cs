@@ -13,6 +13,18 @@ namespace TestingConsole
             string input = args[0];
             string output = args[1];
 
+            
+            // ReadWriteAudio(input, output);
+            // ReadWriteVideo(input, output);
+        }
+
+        static void ReadWriteAudio(string input, string output)
+        {
+
+        }
+
+        static void ReadWriteVideo(string input, string output)
+        {
             var video = new VideoReader(input);
             video.LoadMetadata().Wait();
             video.Load();
@@ -28,7 +40,7 @@ namespace TestingConsole
                     var f = video.NextFrame(frame);
                     if (f == null) break;
 
-                    
+
                     for (int i = 0; i < 100; i++)
                         for (int j = 0; j < 100; j++)
                         {
