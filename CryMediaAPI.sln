@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29911.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryMediaAPI", "CryMediaAPI\CryMediaAPI.csproj", "{4A5AAC4D-BF24-47AA-B1DA-65B2497179F3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryVideoConsole", "CryVideoConsole\CryVideoConsole.csproj", "{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingConsole", "TestingConsole\TestingConsole.csproj", "{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
