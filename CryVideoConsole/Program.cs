@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using CryVideoAPI;
+using CryMediaAPI.Video;
 
 namespace CryVideoConsole
 {
@@ -20,7 +20,7 @@ namespace CryVideoConsole
 
             using (var writer = new VideoWriter(output, video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate))
             {
-                writer.OpenForWriting(true);
+                writer.OpenForWriting(false);
 
                 var frame = new VideoFrame(video.Metadata.Width, video.Metadata.Height);
                 while (true)

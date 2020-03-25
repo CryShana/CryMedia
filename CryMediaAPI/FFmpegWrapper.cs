@@ -2,7 +2,7 @@
 using System.IO;
 using System.Diagnostics;
 
-namespace CryVideoAPI
+namespace CryMediaAPI
 {
     internal static class FFmpegWrapper
     {
@@ -54,6 +54,7 @@ namespace CryVideoAPI
                 RedirectStandardInput = true,
                 RedirectStandardError = !showOutput,
                 RedirectStandardOutput = !showOutput,
+                CreateNoWindow = !showOutput,
                 Arguments = $"{command}"
             });
 

@@ -1,14 +1,11 @@
-﻿using CryVideoAPI.Models;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CryMediaAPI.Video.Models;
 
-namespace CryVideoAPI
+namespace CryMediaAPI.Video
 {
     public class VideoReader : IDisposable
     {
