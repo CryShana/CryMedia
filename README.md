@@ -205,5 +205,6 @@ You are free to request any wanted features and I will consider adding them.
 I am planning to implement the following features in the future:
 
 - Reading multiple audio samples at once for faster processing
+- Reading/Writing 10-bit videos
 - Reading/Writing videos with multiple streams (together with audio)
 - Saving frames as images
