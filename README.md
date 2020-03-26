@@ -200,3 +200,10 @@ For specialized needs, you can use the FFmpeg wrapper functions directly using t
 This is a personal project. I might add more features in the future.
 
 You are free to request any wanted features and I will consider adding them.
+
+## Roadmap
+I am planning to implement the following features in the future:
+
+- Reading multiple audio samples at once for faster processing
+- Reading/Writing videos with multiple streams (together with audio)
+- Saving frames as images
