@@ -45,7 +45,7 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Opens output audio file for writing. This will delete any existing file. Call this before writing frames.
+        /// Opens output audio file for writing. This will delete any existing file. Call this before writing samples.
         /// </summary>
         /// <param name="showFFmpegOutput">Show FFmpeg encoding output for debugging purposes.</param>
         public void OpenWrite(bool showFFmpegOutput = false)
@@ -86,7 +86,7 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Encode the audio sample.
         /// </summary>
-        /// <param name="frame">Audio sample to encode</param>
+        /// <param name="sample">Audio sample to encode</param>
         public void WriteSample(AudioSample sample)
         {
             if (!outOpened) throw new InvalidOperationException("File needs to be opened for writing first!");
