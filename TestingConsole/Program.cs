@@ -152,7 +152,7 @@ namespace TestingConsole
         {
             var video = new VideoReader(input);
             video.LoadMetadata().Wait();
-            video.Load();
+            video.Load(60.5);
 
             var fr = video.NextFrame();
             fr.Save("test.png");

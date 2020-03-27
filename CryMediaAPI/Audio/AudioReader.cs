@@ -14,6 +14,7 @@ namespace CryMediaAPI.Audio
         int loadedBitDepth = 16;
         bool loadedAudio = false;
         bool loadedMetadata = false;
+        public long CurrentSampleOffset { get; set; } = 0;
 
         public string Filename { get; }
         public AudioMetadata Metadata { get; private set; }
@@ -118,11 +119,8 @@ namespace CryMediaAPI.Audio
         /// <param name="samples">Number of samples to read in a frame</param>
         public AudioFrame NextFrame(int samples = 1024)
         {
-            if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
-
             var frame = new AudioFrame(samples, Metadata.Channels, loadedBitDepth);
-            var success = frame.Load(audioStream);
-            return success ? frame : null;
+            return NextFrame(frame);
         }
 
         /// <summary>
@@ -135,6 +133,7 @@ namespace CryMediaAPI.Audio
             if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
 
             var success = frame.Load(audioStream);
+            if (success) CurrentSampleOffset += frame.LoadedSamples;
             return success ? frame : null;
         }
 
