@@ -1,6 +1,8 @@
 # CryMedia
 A cross-platform .NET library that offers a simple interface for reading, writing and playing video and audio files using FFmpeg.
 
+Focuses on the ability to edit raw video/audio data directly using C#.
+
 ## Requirements
 - **FFmpeg** executable for reading and writing video/audio data
 - **FFprobe** executable for reading video/audio metadata
