@@ -59,6 +59,8 @@ namespace CryMediaAPI.Video
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public void Save(string output, string encoder = "png", string extraParameters = "", string ffmpegExecutable = "ffmpeg")
         {
+            if (File.Exists(output)) File.Delete(output);
+
             using (var inp = FFmpegWrapper.OpenInput(ffmpegExecutable, $"-f rawvideo -video_size {Width}:{Height} -pixel_format rgb24 -i - " +
                 $"-c:v {encoder} {extraParameters} -f image2pipe \"{output}\"",
                 out _, false))

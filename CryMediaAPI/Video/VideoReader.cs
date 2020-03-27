@@ -14,6 +14,7 @@ namespace CryMediaAPI.Video
         string ffmpeg, ffprobe;
         bool loadedVideo = false;
         bool loadedMetadata = false;
+        public long CurrentFrameOffset { get; set; } = 0;
 
         public string Filename { get; }
         public VideoMetadata Metadata { get; private set; }
@@ -99,14 +100,21 @@ namespace CryMediaAPI.Video
         /// <summary>
         /// Load the video and prepare it for reading frames.
         /// </summary>
-        public void Load()
+        public void Load() => Load(0);
+
+        /// <summary>
+        /// Load the video for reading frames and seeks to given offset in seconds.
+        /// </summary>
+        /// <param name="offsetSeconds">Offset in seconds to which to seek to</param>
+        public void Load(double offsetSeconds)
         {
             if (loadedVideo) throw new InvalidOperationException("Video is already loaded!");
             if (!loadedMetadata) throw new InvalidOperationException("Please load the video metadata first!");
             if (Metadata.Width == 0 || Metadata.Height == 0) throw new InvalidDataException("Loaded metadata contains errors!");
 
             // we will be reading video in RGB24 format
-            videoStream = FFmpegWrapper.OpenOutput(ffmpeg, $"-i \"{Filename}\" -pix_fmt rgb24 -f rawvideo -");
+            videoStream = FFmpegWrapper.OpenOutput(ffmpeg, $"{(offsetSeconds <= 0 ? "" : $"-ss {offsetSeconds:0.00}")} -i \"{Filename}\"" +
+                $" -pix_fmt rgb24 -f rawvideo -");
             loadedVideo = true;
         }
 
@@ -116,11 +124,8 @@ namespace CryMediaAPI.Video
         /// </summary>
         public VideoFrame NextFrame()
         {
-            if (!loadedVideo) throw new InvalidOperationException("Please load the video first!");
-
             var frame = new VideoFrame(Metadata.Width, Metadata.Height);
-            var success = frame.Load(videoStream);
-            return success ? frame : null;
+            return NextFrame(frame);
         }
 
         /// <summary>
@@ -133,9 +138,9 @@ namespace CryMediaAPI.Video
             if (!loadedVideo) throw new InvalidOperationException("Please load the video first!");
 
             var success = frame.Load(videoStream);
+            if (success) CurrentFrameOffset++;
             return success ? frame : null;
         }
-
 
         static Regex bitRateSimpleRgx = new Regex(@"\D(\d+?)[bl]e", RegexOptions.Compiled);
         int tryParseBitDepth(string pix_fmt)
