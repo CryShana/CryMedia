@@ -3,20 +3,18 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CryMediaAPI.BaseClasses;
 using CryMediaAPI.Audio.Models;
 
 namespace CryMediaAPI.Audio
 {
-    public class AudioReader : IDisposable
+    public class AudioReader : MediaReader<AudioFrame, AudioWriter>, IDisposable
     {
-        Stream audioStream;
         string ffmpeg, ffprobe;
         int loadedBitDepth = 16;
-        bool loadedAudio = false;
-        bool loadedMetadata = false;
-        public long CurrentSampleOffset { get; set; } = 0;
 
-        public string Filename { get; }
+        public long CurrentSampleOffset { get; private set; }
+        public bool MetadataLoaded { get; private set; }      
         public AudioMetadata Metadata { get; private set; }
 
         /// <summary>
@@ -39,7 +37,7 @@ namespace CryMediaAPI.Audio
         /// </summary>
         public async Task LoadMetadata(bool ignoreStreamErrors = false)
         {
-            if (loadedMetadata) throw new InvalidOperationException("Video metadata is already loaded!");
+            if (MetadataLoaded) throw new InvalidOperationException("Video metadata is already loaded!");
             var r = FFmpegWrapper.OpenOutput(ffprobe, $"-i \"{Filename}\" -v quiet -print_format json=c=1 -show_format -show_streams");
 
             try
@@ -86,7 +84,7 @@ namespace CryMediaAPI.Audio
                     if (!ignoreStreamErrors) throw new InvalidDataException("Failed to parse audio stream data! " + ex.Message);
                 }
 
-                loadedMetadata = true;
+                MetadataLoaded = true;
                 Metadata = metadata;
             }
             catch (JsonException ex)
@@ -102,22 +100,28 @@ namespace CryMediaAPI.Audio
         public void Load(int bitDepth = 16)
         {
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
-            if (loadedAudio) throw new InvalidOperationException("Audio is already loaded!");
-            if (!loadedMetadata) throw new InvalidOperationException("Please load the audio metadata first!");
-            //if (Metadata.Width == 0 || Metadata.Height == 0) throw new InvalidDataException("Loaded metadata contains errors!");
+            if (OpenedForReading) throw new InvalidOperationException("Audio is already loaded!");
+            if (!MetadataLoaded) throw new InvalidOperationException("Please load the audio metadata first!");
 
             // we will be reading audio in S16LE format (for best accuracy, could use S32LE)
-            audioStream = FFmpegWrapper.OpenOutput(ffmpeg, $"-i \"{Filename}\" -f s{bitDepth}le -");
+            DataStream = FFmpegWrapper.OpenOutput(ffmpeg, $"-i \"{Filename}\" -f s{bitDepth}le -");
             loadedBitDepth = bitDepth;
-            loadedAudio = true;
+            OpenedForReading = true;
         }
 
         /// <summary>
         /// Loads the next audio frame into memory and returns it. This allocates a new frame.
         /// Returns 'null' when there is no next frame.
         /// </summary>
+        /// <returns></returns>
+        public override AudioFrame NextFrame() => NextFrame(1024);
+
+        /// <summary>
+        /// Loads the next audio frame into memory and returns it. This allocates a new frame.
+        /// Returns 'null' when there is no next frame.
+        /// </summary>
         /// <param name="samples">Number of samples to read in a frame</param>
-        public AudioFrame NextFrame(int samples = 1024)
+        public AudioFrame NextFrame(int samples)
         {
             var frame = new AudioFrame(samples, Metadata.Channels, loadedBitDepth);
             return NextFrame(frame);
@@ -128,18 +132,18 @@ namespace CryMediaAPI.Audio
         /// Returns 'null' when there is no next frame.
         /// </summary>
         /// <param name="frame">Existing frame to be overwritten with new frame data.</param>
-        public AudioFrame NextFrame(AudioFrame frame)
+        public override AudioFrame NextFrame(AudioFrame frame)
         {
-            if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
+            if (!OpenedForReading) throw new InvalidOperationException("Please load the audio first!");
 
-            var success = frame.Load(audioStream);
+            var success = frame.Load(DataStream);
             if (success) CurrentSampleOffset += frame.LoadedSamples;
             return success ? frame : null;
         }
 
         public void Dispose()
         {
-            audioStream?.Dispose();
+            DataStream?.Dispose();
         }
     }
 }

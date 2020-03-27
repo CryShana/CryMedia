@@ -1,17 +1,13 @@
 ﻿using System;
-using System.IO;
 using System.Diagnostics;
+using CryMediaAPI.BaseClasses;
 
 namespace CryMediaAPI.Video
 {
-    public class VideoPlayer : IDisposable
+    public class VideoPlayer : MediaWriter<VideoFrame>, IDisposable
     {
         string ffplay;
-        Stream input;
         Process ffplayp;
-        bool outOpened = false;
-
-        public string Filename { get; }
 
         /// <summary>
         /// Used for playing video data
@@ -30,7 +26,7 @@ namespace CryMediaAPI.Video
         /// </summary>
         public void Play()
         {
-            if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
+            if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
             FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"");
@@ -42,7 +38,7 @@ namespace CryMediaAPI.Video
         /// <param name="runPureBackground">Detach the player from this VideoPlayer control. Player won't be killed on disposing.</param>
         public Process PlayInBackground(bool runPureBackground = false)
         {
-            if (!runPureBackground && outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
+            if (!runPureBackground && OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
             FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"", out Process p);
@@ -59,17 +55,17 @@ namespace CryMediaAPI.Video
         /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
         public void OpenWrite(int width, int height, string framerateFrequency, bool showFFplayOutput = false)
         {
-            if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
+            if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
             try
             {
                 if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
             }
             catch { }
 
-            input = FFmpegWrapper.OpenInput(ffplay, $"-f rawvideo -video_size {width}:{height} -framerate {framerateFrequency} -pixel_format rgb24 -i -",
+            DataStream = FFmpegWrapper.OpenInput(ffplay, $"-f rawvideo -video_size {width}:{height} -framerate {framerateFrequency} -pixel_format rgb24 -i -",
                 out ffplayp, showFFplayOutput);
 
-            outOpened = true;
+            OpenedForWriting = true;
         }
 
         /// <summary>
@@ -77,7 +73,7 @@ namespace CryMediaAPI.Video
         /// </summary>
         public void CloseWrite()
         {
-            if (!outOpened) throw new InvalidOperationException("Player is not opened for writing frames!");
+            if (!OpenedForWriting) throw new InvalidOperationException("Player is not opened for writing frames!");
 
             try
             {
@@ -87,28 +83,17 @@ namespace CryMediaAPI.Video
                 }
                 catch { }
 
-                input.Dispose();
+                DataStream.Dispose();
             }
             finally
             {
-                outOpened = false;
+                OpenedForWriting = false;
             }
-        }
-
-        /// <summary>
-        /// Write frame to FFplay to play it.
-        /// </summary>
-        /// <param name="frame">Video frame to write to player</param>
-        public void WriteFrame(VideoFrame frame)
-        {
-            if (!outOpened) throw new InvalidOperationException("Player not opened for writing frames!");
-
-            input.Write(frame.RawData.Span);
         }
 
         public void Dispose()
         {
-            if (outOpened) CloseWrite();
+            if (OpenedForWriting) CloseWrite();
             else
             {
                 try

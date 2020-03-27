@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Channels;
+using CryMediaAPI.BaseClasses;
 
 namespace CryMediaAPI.Audio
 {
     /// <summary>
     /// Audio frame containing multiple audio samples in signed PCM format with given bit depth.
     /// </summary>
-    public class AudioFrame : IDisposable
+    public class AudioFrame : IDisposable, IMediaFrame
     {     
         int size, offset = 0;
 
