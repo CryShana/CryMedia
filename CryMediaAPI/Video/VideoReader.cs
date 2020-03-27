@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CryMediaAPI.Video.Models;
+using System.Text.RegularExpressions;
 
 namespace CryMediaAPI.Video
 {
@@ -54,9 +55,14 @@ namespace CryMediaAPI.Video
                         metadata.PixelFormat = videoStream.PixFmt;
                         metadata.Codec = videoStream.CodecName;
                         metadata.CodecLongName = videoStream.CodecLongName;
+
                         metadata.BitRate = videoStream.BitRate == null ? -1 : int.Parse(videoStream.BitRate);
-                        metadata.BitDepth = videoStream.BitsPerRawSample == null ? -1 : int.Parse(videoStream.BitsPerRawSample);
-                        metadata.Duration = double.Parse(videoStream.Duration);
+                        metadata.BitDepth = videoStream.BitsPerRawSample == null ? tryParseBitDepth(videoStream.PixFmt) : int.Parse(videoStream.BitsPerRawSample);
+
+                        metadata.Duration = videoStream.Duration == null ? 
+                            double.Parse(metadata.Format.Duration ?? "0") : 
+                            double.Parse(videoStream.Duration);
+
                         metadata.SampleAspectRatio = videoStream.SampleAspectRatio;
                         metadata.AvgFramerateText = videoStream.AvgFrameRate;
                         metadata.AvgFramerate = 0.0;
@@ -124,6 +130,16 @@ namespace CryMediaAPI.Video
 
             var success = frame.Load(videoStream);
             return success ? frame : null;
+        }
+
+
+        static Regex bitRateSimpleRgx = new Regex(@"\D(\d+?)[bl]e", RegexOptions.Compiled);
+        int tryParseBitDepth(string pix_fmt)
+        {
+            var match = bitRateSimpleRgx.Match(pix_fmt);
+            if (match.Success) return int.Parse(match.Groups[1].Value);
+
+            return -1;
         }
 
         public void Dispose()
