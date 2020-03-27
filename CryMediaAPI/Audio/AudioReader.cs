@@ -22,7 +22,7 @@ namespace CryMediaAPI.Audio
         public AudioMetadata Metadata { get; private set; }
 
         /// <summary>
-        /// Used for reading metadata and frames from audio files.
+        /// Used for reading metadata and samples from audio files.
         /// </summary>
         /// <param name="filename">Audio file path</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
@@ -90,7 +90,7 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Load the audio and prepare it for reading frames.
+        /// Load the audio and prepare it for reading samples.
         /// </summary>
         /// <param name="bitDepth">Sample bit rate in which the audio will be processed (16, 24, 32)</param>
         public void Load(int bitDepth = 16)
@@ -114,22 +114,22 @@ namespace CryMediaAPI.Audio
         {
             if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
 
-            var frame = new AudioSample(Metadata.Channels, loadedBitDepth);
-            var success = frame.Load(audioStream);
-            return success ? frame : null;
+            var sample = new AudioSample(Metadata.Channels, loadedBitDepth);
+            var success = sample.Load(audioStream);
+            return success ? sample : null;
         }
 
         /// <summary>
         /// Loads the next audio sample into memory and returns it. This overrides the given sample with no extra allocations. Recommended for performance.
         /// Returns 'null' when there is no next sample.
         /// </summary>
-        /// <param name="frame">Existing sample to be overwritten with new frame data.</param>
-        public AudioSample NextSample(AudioSample frame)
+        /// <param name="sample">Existing sample to be overwritten with new sample data.</param>
+        public AudioSample NextSample(AudioSample sample)
         {
             if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
 
-            var success = frame.Load(audioStream);
-            return success ? frame : null;
+            var success = sample.Load(audioStream);
+            return success ? sample : null;
         }
 
         public void Dispose()

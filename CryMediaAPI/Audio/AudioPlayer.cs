@@ -20,7 +20,7 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Used for playing audio data
         /// </summary>
-        /// <param name="input">Input audio to play (can be left empty if planning on playing frames directly)</param>
+        /// <param name="input">Input audio to play (can be left empty if planning on playing samples directly)</param>
         /// <param name="ffplayExecutable">Name or path to the ffplay executable</param> 
         public AudioPlayer(string input = null, string ffplayExecutable = "ffplay")
         {
@@ -34,7 +34,7 @@ namespace CryMediaAPI.Audio
         /// </summary>
         public void Play(bool showWindow = false)
         {
-            if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
+            if (outOpened) throw new InvalidOperationException("Player is already opened for writing samples!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
             FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -showmode 0"));
@@ -47,7 +47,7 @@ namespace CryMediaAPI.Audio
         /// <param name="runPureBackground">Detach the player from this AudioPlayer control. Player won't be killed on disposing.</param>
         public Process PlayInBackground(bool showWindow = false, bool runPureBackground = false)
         {
-            if (!runPureBackground && outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
+            if (!runPureBackground && outOpened) throw new InvalidOperationException("Player is already opened for writing samples!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
             FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -showmode 0"), out Process p);
@@ -56,7 +56,7 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Open player for writing frames for playing.
+        /// Open player for writing samples for playing.
         /// </summary>
         /// <param name="sampleRate">Sample rate</param>
         /// <param name="channels">Number of channels</param>
@@ -65,7 +65,7 @@ namespace CryMediaAPI.Audio
         public void OpenWrite(int sampleRate, int channels, int bitDepth = 16, bool showFFplayOutput = false)
         {
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
-            if (outOpened) throw new InvalidOperationException("Player is already opened for writing frames!");
+            if (outOpened) throw new InvalidOperationException("Player is already opened for writing samples!");
             try
             {
                 if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
@@ -80,11 +80,11 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Close player for writing frames.
+        /// Close player for writing samples.
         /// </summary>
         public void CloseWrite()
         {
-            if (!outOpened) throw new InvalidOperationException("Player is not opened for writing frames!");
+            if (!outOpened) throw new InvalidOperationException("Player is not opened for writing samples!");
 
             try
             {
@@ -105,12 +105,12 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Write audio sample to FFplay to play it.
         /// </summary>
-        /// <param name="frame">Audio frame to write to player</param>
-        public void WriteSample(AudioSample frame)
+        /// <param name="sample">Audio sample to write to player</param>
+        public void WriteSample(AudioSample sample)
         {
-            if (!outOpened) throw new InvalidOperationException("Player not opened for writing frames!");
+            if (!outOpened) throw new InvalidOperationException("Player not opened for writing samples!");
 
-            input.Write(frame.RawData.Span);
+            input.Write(sample.RawData.Span);
         }
 
         public void Dispose()

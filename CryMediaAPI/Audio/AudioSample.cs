@@ -4,18 +4,18 @@ using System.IO;
 namespace CryMediaAPI.Audio
 {
     /// <summary>
-    /// Audio frame containing sample data in RGB24 format.
+    /// Audio sample containing sample data in PCM format with given bit depth.
     /// </summary>
     public class AudioSample : IDisposable
     {
         int depthBytes = 0;
         int size, offset = 0;
 
-        byte[] frameBuffer;
+        byte[] sampleBuffer;
         public Memory<byte> RawData { get; }
 
         /// <summary>
-        /// Creates an empty audio frame with given dimensions using the RGB24 pixel format.
+        /// Creates an empty audio sample with given bit depth using the PCM format.
         /// </summary>
         public AudioSample(int channels, int bitDepth = 16)
         {
@@ -24,21 +24,21 @@ namespace CryMediaAPI.Audio
 
             this.depthBytes = bitDepth / 8;
             size = channels * depthBytes;
-            frameBuffer = new byte[size];
-            RawData = frameBuffer.AsMemory();
+            sampleBuffer = new byte[size];
+            RawData = sampleBuffer.AsMemory();
         }
 
         /// <summary>
         /// Loads sample data from stream.
         /// </summary>
-        /// <param name="str">Stream containing raw frame data in RGB24 format</param>
+        /// <param name="str">Stream containing raw sample data in PCM format</param>
         public bool Load(Stream str)
         {
             offset = 0;
 
             while (offset < size)
             {
-                var r = str.Read(frameBuffer, offset, size - offset);
+                var r = str.Read(sampleBuffer, offset, size - offset);
                 if (r <= 0) return false;
                 offset += r;
             }
@@ -58,7 +58,7 @@ namespace CryMediaAPI.Audio
 
         public void Dispose()
         {
-            frameBuffer = null;
+            sampleBuffer = null;
         }
     }
 }
