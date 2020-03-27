@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Channels;
 
 namespace CryMediaAPI.Audio
 {
@@ -55,7 +56,7 @@ namespace CryMediaAPI.Audio
                 offset += r;
             }
 
-            LoadedSamples = offset % BytesPerSample;
+            LoadedSamples = offset / (BytesPerSample * Channels);
             return true;
         }
 
