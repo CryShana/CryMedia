@@ -124,23 +124,23 @@ var samplerate = audio.Metadata.SampleRate;
 var codec = audio.Metadata.Codec;
 var duration = audio.Metadata.Duration;
 ```
-### Reading and modifying audio samples
+### Reading and modifying audio samples (frames)
 ```csharp
-// open audio for reading samples
+// open audio for reading samples (frames)
 audio.Load();
 // audio.Load(24); // <-- you can specify bit-depth (16, 24, 32)
 
-// read next sample (in S16LE format - depends on used bit-depth)
-var sample = audio.NextSample();
+// read next number of samples (frame) (in S16LE format - depends on used bit-depth)
+var frame = audio.NextFrame();
 
-// get value from first channel (index 0)
-var val = sample.GetValue(0).Span;
+// get first sample from first channel
+var val = frame.GetSample(0, 0).Span;
 
 // set values (default bit-depth is 16 = 2 bytes)
 val[0] = 124;
 val[1] = 23;
 ```
-### Writing audio samples
+### Writing audio samples (frames)
 ```csharp
 using (var writer = new AudioWriter("out.mp3", channels, sample_rate, 16)
 {
@@ -149,17 +149,17 @@ using (var writer = new AudioWriter("out.mp3", channels, sample_rate, 16)
 
     while (true)
     {
-        // read next sample (using AudioReader)
-        var f = audio.NextSample(sample);
+        // read next number of samples (frame)
+        var f = audio.NextFrame(frame);
         if (f == null) break;
 
-        // modify sample in first channel
-        var val = sample.GetValue(0).Span;
+        // get and modify first sample in first channel
+        var val = frame.GetSample(0, 0).Span;
         val[0] = 122;
         val[1] = 23;
 
-        // write the modified sample
-        writer.WriteFrame(sample);
+        // write the modified frame
+        writer.WriteFrame(frame);
     }
 }
 ```
@@ -189,8 +189,8 @@ player.Play();
 var player = new AudioPlayer();
 player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels);
 
-// play sample... (usually you would have this in a loop)
-player.WriteSample(sample);
+// play frame... (usually you would have this in a loop)
+player.WriteFrame(sample);
 
 // dispose manually or use 'using' statement
 player.Dispose();
@@ -206,7 +206,5 @@ You are free to request any wanted features and I will consider adding them.
 ## Roadmap
 I am planning to implement the following features in the future:
 
-- Reading multiple audio samples at once for faster processing
-- Reading/Writing 10-bit videos
 - Reading/Writing videos with multiple streams (together with audio)
 - Saving frames as images
