@@ -56,8 +56,12 @@ namespace CryMediaAPI.Video
                         metadata.Codec = videoStream.CodecName;
                         metadata.CodecLongName = videoStream.CodecLongName;
 
-                        metadata.BitRate = videoStream.BitRate == null ? -1 : int.Parse(videoStream.BitRate);
-                        metadata.BitDepth = videoStream.BitsPerRawSample == null ? tryParseBitDepth(videoStream.PixFmt) : int.Parse(videoStream.BitsPerRawSample);
+                        metadata.BitRate = videoStream.BitRate == null ? -1 : 
+                            int.Parse(videoStream.BitRate);
+
+                        metadata.BitDepth = videoStream.BitsPerRawSample == null ? 
+                            tryParseBitDepth(videoStream.PixFmt) : 
+                            int.Parse(videoStream.BitsPerRawSample);
 
                         metadata.Duration = videoStream.Duration == null ? 
                             double.Parse(metadata.Format.Duration ?? "0") : 

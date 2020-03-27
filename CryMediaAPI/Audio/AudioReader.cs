@@ -54,9 +54,17 @@ namespace CryMediaAPI.Audio
                         metadata.Codec = audioStream.CodecName;
                         metadata.CodecLongName = audioStream.CodecLongName;
                         metadata.SampleFormat = audioStream.SampleFmt;
-                        metadata.SampleRate = int.Parse(audioStream.SampleRate);
-                        metadata.Duration = double.Parse(audioStream.Duration);
-                        metadata.BitRate = audioStream.BitRate == null ? -1 : int.Parse(audioStream.BitRate);
+
+                        metadata.SampleRate = audioStream.SampleRate == null ? -1 : 
+                            int.Parse(audioStream.SampleRate);
+
+                        metadata.Duration = audioStream.Duration == null ? 
+                            double.Parse(metadata.Format.Duration ?? "-1") : 
+                            double.Parse(audioStream.Duration);
+
+                        metadata.BitRate = audioStream.BitRate == null ? -1 : 
+                            int.Parse(audioStream.BitRate);
+
                         metadata.BitDepth = audioStream.BitsPerSample;
                         metadata.PredictedSampleCount = (int)Math.Round(metadata.Duration * metadata.SampleRate);
 
