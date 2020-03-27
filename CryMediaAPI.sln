@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryMediaAPI", "CryMediaAPI\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingConsole", "TestingConsole\TestingConsole.csproj", "{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryMediaAPI.Tests", "CryMediaAPI.Tests\CryMediaAPI.Tests.csproj", "{62FFCE7F-C7C3-4C84-B7A9-F894E3E31D2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0ED87366-A2D3-49A2-9DFF-CFC8A9870B24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62FFCE7F-C7C3-4C84-B7A9-F894E3E31D2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62FFCE7F-C7C3-4C84-B7A9-F894E3E31D2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62FFCE7F-C7C3-4C84-B7A9-F894E3E31D2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62FFCE7F-C7C3-4C84-B7A9-F894E3E31D2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
