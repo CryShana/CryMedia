@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>CryShana</Authors>
     <Company />
     <Product>CryMedia</Product>
     <Description>A cross-platform .NET library for reading, writing and playing video and audio files using FFmpeg.</Description>
     <PackageProjectUrl>https://github.com/CryShana/CryMedia</PackageProjectUrl>
+    <PackageTags>ffmpeg;media;player;media player;video player;videoplayer;audioplayer;audio player;processing</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
