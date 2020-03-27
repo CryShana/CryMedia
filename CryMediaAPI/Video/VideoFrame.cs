@@ -52,6 +52,23 @@ namespace CryMediaAPI.Video
         }
 
         /// <summary>
+        /// Save frame as an image
+        /// </summary>
+        /// <param name="output">Output image</param>
+        /// <param name="encoder">Encoder for image ('png', 'libwebp')</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public void Save(string output, string encoder = "png", string extraParameters = "", string ffmpegExecutable = "ffmpeg")
+        {
+            using (var inp = FFmpegWrapper.OpenInput(ffmpegExecutable, $"-f rawvideo -video_size {Width}:{Height} -pixel_format rgb24 -i - " +
+                $"-c:v {encoder} {extraParameters} -f image2pipe \"{output}\"",
+                out _, false))
+            {
+                // save it
+                inp.Write(RawData.Span);
+            }
+        }
+
+        /// <summary>
         /// Returns part of memory that contains the pixel data.
         /// </summary>
         /// <param name="x">Starting X coordinate of wanted pixel/s</param>

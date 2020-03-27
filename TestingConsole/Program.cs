@@ -20,6 +20,8 @@ namespace TestingConsole
 
             // ReadPlayAudio(input, output);
             // ReadPlayVideo(input, output);
+
+            // SaveVideoFrame(input);
         }
 
         static void ReadWriteAudio(string input, string output)
@@ -144,6 +146,16 @@ namespace TestingConsole
                     }
                 }
             }
+        }
+
+        static void SaveVideoFrame(string input)
+        {
+            var video = new VideoReader(input);
+            video.LoadMetadata().Wait();
+            video.Load();
+
+            var fr = video.NextFrame();
+            fr.Save("test.png");
         }
     }
 }
