@@ -109,6 +109,20 @@ player.WriteFrame(frame);
 player.Dispose();
 ```
 
+### Seeking & saving frame as image
+```csharp
+// seek to 60 seconds and 500ms (60.5sec)
+videoReader.Load(60.5);   
+
+var fr = videoReader.NextFrame();
+
+// save frame as PNG
+fr.Save("frame.png");
+
+// save frame as WEBP
+fr.Save("frame.webp", "libwebp");
+```
+
 ## Audio Usage
 ### Reading audio metadata
 ```csharp
@@ -207,4 +221,3 @@ You are free to request any wanted features and I will consider adding them.
 I am planning to implement the following features in the future:
 
 - Reading/Writing videos with multiple streams (together with audio)
-- Saving frames as images
