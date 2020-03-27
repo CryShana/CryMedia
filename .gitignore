@@ -5,3 +5,5 @@ TestingConsole/bin
 TestingConsole/obj
 TestingConsole/Properties/launchSettings.json
 CryMediaAPI/CryMediaAPI.xml
+CryMediaAPI.Tests/obj
+CryMediaAPI.Tests/bin
