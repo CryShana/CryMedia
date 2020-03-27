@@ -103,14 +103,14 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Write audio sample to FFplay to play it.
+        /// Write audio samples to FFplay to play it.
         /// </summary>
-        /// <param name="sample">Audio sample to write to player</param>
-        public void WriteSample(AudioSample sample)
+        /// <param name="frame">Audio frame to write to player</param>
+        public void WriteFrame(AudioFrame frame)
         {
             if (!outOpened) throw new InvalidOperationException("Player not opened for writing samples!");
 
-            input.Write(sample.RawData.Span);
+            input.Write(frame.RawData.Span);
         }
 
         public void Dispose()

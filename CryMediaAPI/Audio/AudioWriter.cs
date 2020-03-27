@@ -20,7 +20,7 @@ namespace CryMediaAPI.Audio
         public string Filename { get; }
 
         /// <summary>
-        /// Used for encoding samples into a new audio file
+        /// Used for encoding audio samples into a new audio file
         /// </summary>
         /// <param name="filename">Output audio file name/path</param>
         /// <param name="channels">Input number of channels</param>
@@ -84,14 +84,14 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Encode the audio sample.
+        /// Encode the audio frame.
         /// </summary>
-        /// <param name="sample">Audio sample to encode</param>
-        public void WriteSample(AudioSample sample)
+        /// <param name="frame">Audio frame to encode</param>
+        public void WriteFrame(AudioFrame frame)
         {
             if (!outOpened) throw new InvalidOperationException("File needs to be opened for writing first!");
 
-            input.Write(sample.RawData.Span);
+            input.Write(frame.RawData.Span);
         }
 
         public void Dispose()
