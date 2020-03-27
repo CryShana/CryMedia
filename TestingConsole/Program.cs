@@ -32,14 +32,14 @@ namespace TestingConsole
             {
                 writer.OpenWrite(true);
 
-                var sample = new AudioSample(audio.Metadata.Channels);
+                var frame = new AudioFrame(1, audio.Metadata.Channels);
                 while (true)
                 {
                     // read next sample
-                    var f = audio.NextSample(sample);
+                    var f = audio.NextFrame(frame);
                     if (f == null) break;
 
-                    writer.WriteSample(sample);
+                    writer.WriteFrame(frame);
                 }
             }
         }
@@ -76,14 +76,13 @@ namespace TestingConsole
             }
         }
 
-
         static void ReadPlayVideo(string input, string output)
         {
             var video = new VideoReader(input);
             video.LoadMetadata().Wait();
             video.Load();
 
-            using (var player = new VideoPlayer(output))
+            using (var player = new VideoPlayer())
             {
                 player.OpenWrite(video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerateText, true);
 
@@ -127,16 +126,16 @@ namespace TestingConsole
             {
                 player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels);
 
-                var sample = new AudioSample(audio.Metadata.Channels);
+                var frame = new AudioFrame(audio.Metadata.Channels);
                 while (true)
                 {
                     // read next frame
-                    var f = audio.NextSample(sample);
+                    var f = audio.NextFrame(frame);
                     if (f == null) break;
 
                     try
                     {
-                        player.WriteSample(sample);
+                        player.WriteFrame(frame);
                     }
                     catch (IOException) { break; }
                     catch
