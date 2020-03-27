@@ -82,11 +82,14 @@ namespace TestingConsole
         {
             var video = new VideoReader(input);
             video.LoadMetadata().Wait();
-            video.Load();
+            video.Load();     
 
             using (var player = new VideoPlayer())
             {
                 player.OpenWrite(video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerateText, true);
+
+                // For simple playing, can just use "CopyTo"
+                // video.CopyTo(player);
 
                 var frame = new VideoFrame(video.Metadata.Width, video.Metadata.Height);
                 while (true)
@@ -127,7 +130,10 @@ namespace TestingConsole
             using (var player = new AudioPlayer())
             {
                 player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels);
-
+                
+                // For simple playing, can just use "CopyTo"
+                // audio.CopyTo(player);
+                
                 var frame = new AudioFrame(audio.Metadata.Channels);
                 while (true)
                 {
@@ -156,6 +162,11 @@ namespace TestingConsole
 
             var fr = video.NextFrame();
             fr.Save("test.png");
+        }
+
+        static void ConvertVideo(string input, string output)
+        {
+
         }
     }
 }

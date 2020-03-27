@@ -1,23 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics;
+using CryMediaAPI.BaseClasses;
 
 namespace CryMediaAPI.Video
 {
-    public class VideoWriter : IDisposable
+    public class VideoWriter : MediaWriter<VideoFrame>, IDisposable
     {
         string ffmpeg;
 
-        Stream input;
-        Process ffmpegp;
-        bool outOpened = false;
-
+        internal Process ffmpegp;
+        
         public int Width { get; }
         public int Height { get; }
         public double Framerate { get; }
         public FFmpegVideoEncoderOptions EncoderOptions { get; }
 
-        public string Filename { get; }
 
         /// <summary>
         /// Used for encoding frames into a new video file
@@ -49,14 +47,14 @@ namespace CryMediaAPI.Video
         /// <param name="showFFmpegOutput">Show FFmpeg encoding output for debugging purposes.</param>
         public void OpenWrite(bool showFFmpegOutput = false)
         {
-            if (outOpened) throw new InvalidOperationException("File was already opened for writing!");
+            if (OpenedForWriting) throw new InvalidOperationException("File was already opened for writing!");
             if (File.Exists(Filename)) File.Delete(Filename);
 
-            input = FFmpegWrapper.OpenInput(ffmpeg, $"-f rawvideo -video_size {Width}:{Height} -r {Framerate} -pixel_format rgb24 -i - " +
+            DataStream = FFmpegWrapper.OpenInput(ffmpeg, $"-f rawvideo -video_size {Width}:{Height} -r {Framerate} -pixel_format rgb24 -i - " +
                 $"-c:v {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format} \"{Filename}\"",
                 out ffmpegp, showFFmpegOutput);
 
-            outOpened = true;
+            OpenedForWriting = true;
         }
 
         /// <summary>
@@ -64,7 +62,7 @@ namespace CryMediaAPI.Video
         /// </summary>
         public void CloseWrite()
         {
-            if (!outOpened) throw new InvalidOperationException("File is not opened for writing!");
+            if (!OpenedForWriting) throw new InvalidOperationException("File is not opened for writing!");
 
             try
             {
@@ -74,28 +72,17 @@ namespace CryMediaAPI.Video
                 }
                 catch { }
 
-                input.Dispose();
+                DataStream.Dispose();
             }
             finally
             {
-                outOpened = false;
+                OpenedForWriting = false;
             }
-        }
-
-        /// <summary>
-        /// Encode the video frame.
-        /// </summary>
-        /// <param name="frame">Video frame to encode</param>
-        public void WriteFrame(VideoFrame frame)
-        {
-            if (!outOpened) throw new InvalidOperationException("File needs to be opened for writing first!");
-
-            input.Write(frame.RawData.Span);
         }
 
         public void Dispose()
         {
-            if (outOpened) CloseWrite();
+            if (OpenedForWriting) CloseWrite();
         }
     }
 

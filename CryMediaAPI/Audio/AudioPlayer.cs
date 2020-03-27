@@ -1,21 +1,13 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using CryMediaAPI.BaseClasses;
 
 namespace CryMediaAPI.Audio
 {
-    public class AudioPlayer : IDisposable
+    public class AudioPlayer : MediaWriter<AudioFrame>, IDisposable
     {
         string ffplay;
-        Stream input;
         Process ffplayp;
-        bool outOpened = false;
-
-        public string Filename { get; }
 
         /// <summary>
         /// Used for playing audio data
@@ -34,7 +26,7 @@ namespace CryMediaAPI.Audio
         /// </summary>
         public void Play(bool showWindow = false)
         {
-            if (outOpened) throw new InvalidOperationException("Player is already opened for writing samples!");
+            if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing samples!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
             FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -showmode 0"));
@@ -47,7 +39,7 @@ namespace CryMediaAPI.Audio
         /// <param name="runPureBackground">Detach the player from this AudioPlayer control. Player won't be killed on disposing.</param>
         public Process PlayInBackground(bool showWindow = false, bool runPureBackground = false)
         {
-            if (!runPureBackground && outOpened) throw new InvalidOperationException("Player is already opened for writing samples!");
+            if (!runPureBackground && OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing samples!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
             FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -showmode 0"), out Process p);
@@ -65,18 +57,18 @@ namespace CryMediaAPI.Audio
         public void OpenWrite(int sampleRate, int channels, int bitDepth = 16, bool showFFplayOutput = false)
         {
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
-            if (outOpened) throw new InvalidOperationException("Player is already opened for writing samples!");
+            if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing samples!");
             try
             {
                 if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
             }
             catch { }
 
-            input = FFmpegWrapper.OpenInput(ffplay, $"-f s{bitDepth}le -channels {channels} -sample_rate {sampleRate} -i -" 
+            DataStream = FFmpegWrapper.OpenInput(ffplay, $"-f s{bitDepth}le -channels {channels} -sample_rate {sampleRate} -i -" 
                 + (showFFplayOutput ? "" : " -showmode 0"), 
                 out ffplayp, showFFplayOutput);
 
-            outOpened = true;
+            OpenedForWriting = true;
         }
 
         /// <summary>
@@ -84,7 +76,7 @@ namespace CryMediaAPI.Audio
         /// </summary>
         public void CloseWrite()
         {
-            if (!outOpened) throw new InvalidOperationException("Player is not opened for writing samples!");
+            if (!OpenedForWriting) throw new InvalidOperationException("Player is not opened for writing samples!");
 
             try
             {
@@ -94,28 +86,17 @@ namespace CryMediaAPI.Audio
                 }
                 catch { }
 
-                input.Dispose();              
+                DataStream.Dispose();              
             }
             finally
             {
-                outOpened = false;
+                OpenedForWriting = false;
             }         
-        }
-
-        /// <summary>
-        /// Write audio samples to FFplay to play it.
-        /// </summary>
-        /// <param name="frame">Audio frame to write to player</param>
-        public void WriteFrame(AudioFrame frame)
-        {
-            if (!outOpened) throw new InvalidOperationException("Player not opened for writing samples!");
-
-            input.Write(frame.RawData.Span);
         }
 
         public void Dispose()
         {
-            if (outOpened) CloseWrite();
+            if (OpenedForWriting) CloseWrite();
             else
             {
                 try

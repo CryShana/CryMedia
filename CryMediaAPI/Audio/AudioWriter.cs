@@ -1,23 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics;
+using CryMediaAPI.BaseClasses;
 
 namespace CryMediaAPI.Audio
 {
-    public class AudioWriter : IDisposable
+    public class AudioWriter : MediaWriter<AudioFrame>, IDisposable
     {
         string ffmpeg;
 
-        Stream input;
-        Process ffmpegp;
-        bool outOpened = false;
+        internal Process ffmpegp;
 
         public int Channels { get; }
         public int SampleRate { get; }
         public int BitDepth { get; }
-        public FFmpegAudioEncoderOptions EncoderOptions { get; }
+        public FFmpegAudioEncoderOptions EncoderOptions { get; }    
 
-        public string Filename { get; }
 
         /// <summary>
         /// Used for encoding audio samples into a new audio file
@@ -50,14 +48,14 @@ namespace CryMediaAPI.Audio
         /// <param name="showFFmpegOutput">Show FFmpeg encoding output for debugging purposes.</param>
         public void OpenWrite(bool showFFmpegOutput = false)
         {
-            if (outOpened) throw new InvalidOperationException("File was already opened for writing!");
+            if (OpenedForWriting) throw new InvalidOperationException("File was already opened for writing!");
             if (File.Exists(Filename)) File.Delete(Filename);
 
-            input = FFmpegWrapper.OpenInput(ffmpeg, $"-f s{BitDepth}le -channels {Channels} -sample_rate {SampleRate} -i - " +
+            DataStream = FFmpegWrapper.OpenInput(ffmpeg, $"-f s{BitDepth}le -channels {Channels} -sample_rate {SampleRate} -i - " +
                 $"-c:v {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format} \"{Filename}\"",
                 out ffmpegp, showFFmpegOutput);
 
-            outOpened = true;
+            OpenedForWriting = true;
         }
 
         /// <summary>
@@ -65,7 +63,7 @@ namespace CryMediaAPI.Audio
         /// </summary>
         public void CloseWrite()
         {
-            if (!outOpened) throw new InvalidOperationException("File is not opened for writing!");
+            if (!OpenedForWriting) throw new InvalidOperationException("File is not opened for writing!");
 
             try
             {
@@ -75,28 +73,17 @@ namespace CryMediaAPI.Audio
                 }
                 catch { }
 
-                input.Dispose();
+                DataStream.Dispose();
             }
             finally
             {
-                outOpened = false;
+                OpenedForWriting = false;
             }
-        }
-
-        /// <summary>
-        /// Encode the audio frame.
-        /// </summary>
-        /// <param name="frame">Audio frame to encode</param>
-        public void WriteFrame(AudioFrame frame)
-        {
-            if (!outOpened) throw new InvalidOperationException("File needs to be opened for writing first!");
-
-            input.Write(frame.RawData.Span);
         }
 
         public void Dispose()
         {
-            if (outOpened) CloseWrite();
+            if (OpenedForWriting) CloseWrite();
         }
     }
 

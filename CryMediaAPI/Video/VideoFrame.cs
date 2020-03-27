@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using CryMediaAPI.BaseClasses;
 
 namespace CryMediaAPI.Video
 {
     /// <summary>
     /// Video frame containing pixel data in RGB24 format.
     /// </summary>
-    public class VideoFrame : IDisposable
+    public class VideoFrame : IDisposable, IMediaFrame
     {
         int size, offset = 0;
 

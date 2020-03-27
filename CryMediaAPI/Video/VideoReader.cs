@@ -3,21 +3,21 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CryMediaAPI.BaseClasses;
 using CryMediaAPI.Video.Models;
 using System.Text.RegularExpressions;
 
 namespace CryMediaAPI.Video
 {
-    public class VideoReader : IDisposable
+    public class VideoReader : MediaReader<VideoFrame, MediaWriter<VideoFrame>>, IDisposable
     {
         Stream videoStream;
         string ffmpeg, ffprobe;
-        bool loadedVideo = false;
-        bool loadedMetadata = false;
-        public long CurrentFrameOffset { get; set; } = 0;
 
-        public string Filename { get; }
+        public long CurrentFrameOffset { get; private set; }
+        public bool LoadedMetadata { get; private set; }
         public VideoMetadata Metadata { get; private set; }
+
 
         /// <summary>
         /// Used for reading metadata and frames from video files.
@@ -39,7 +39,7 @@ namespace CryMediaAPI.Video
         /// </summary>
         public async Task LoadMetadata(bool ignoreStreamErrors = false)
         {
-            if (loadedMetadata) throw new InvalidOperationException("Video metadata is already loaded!");
+            if (LoadedMetadata) throw new InvalidOperationException("Video metadata is already loaded!");
             var r = FFmpegWrapper.OpenOutput(ffprobe, $"-i \"{Filename}\" -v quiet -print_format json=c=1 -show_format -show_streams");
 
             try
@@ -88,7 +88,7 @@ namespace CryMediaAPI.Video
                     if (!ignoreStreamErrors) throw new InvalidDataException("Failed to parse video stream data! " + ex.Message);
                 }
 
-                loadedMetadata = true;
+                LoadedMetadata = true;
                 Metadata = metadata;
             }
             catch (JsonException ex)
@@ -108,21 +108,21 @@ namespace CryMediaAPI.Video
         /// <param name="offsetSeconds">Offset in seconds to which to seek to</param>
         public void Load(double offsetSeconds)
         {
-            if (loadedVideo) throw new InvalidOperationException("Video is already loaded!");
-            if (!loadedMetadata) throw new InvalidOperationException("Please load the video metadata first!");
+            if (OpenedForReading) throw new InvalidOperationException("Video is already loaded!");
+            if (!LoadedMetadata) throw new InvalidOperationException("Please load the video metadata first!");
             if (Metadata.Width == 0 || Metadata.Height == 0) throw new InvalidDataException("Loaded metadata contains errors!");
 
             // we will be reading video in RGB24 format
             videoStream = FFmpegWrapper.OpenOutput(ffmpeg, $"{(offsetSeconds <= 0 ? "" : $"-ss {offsetSeconds:0.00}")} -i \"{Filename}\"" +
                 $" -pix_fmt rgb24 -f rawvideo -");
-            loadedVideo = true;
+            OpenedForReading = true;
         }
 
         /// <summary>
         /// Loads the next video frame into memory and returns it. This allocates a new frame.
         /// Returns 'null' when there is no next frame.
         /// </summary>
-        public VideoFrame NextFrame()
+        public override VideoFrame NextFrame()
         {
             var frame = new VideoFrame(Metadata.Width, Metadata.Height);
             return NextFrame(frame);
@@ -133,9 +133,9 @@ namespace CryMediaAPI.Video
         /// Returns 'null' when there is no next frame.
         /// </summary>
         /// <param name="frame">Existing frame to be overwritten with new frame data.</param>
-        public VideoFrame NextFrame(VideoFrame frame)
+        public override VideoFrame NextFrame(VideoFrame frame)
         {
-            if (!loadedVideo) throw new InvalidOperationException("Please load the video first!");
+            if (!OpenedForReading) throw new InvalidOperationException("Please load the video first!");
 
             var success = frame.Load(videoStream);
             if (success) CurrentFrameOffset++;
