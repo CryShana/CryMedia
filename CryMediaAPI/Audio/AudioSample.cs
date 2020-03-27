@@ -4,61 +4,75 @@ using System.IO;
 namespace CryMediaAPI.Audio
 {
     /// <summary>
-    /// Audio sample containing sample data in PCM format with given bit depth.
+    /// Audio frame containing multiple audio samples in signed PCM format with given bit depth.
     /// </summary>
-    public class AudioSample : IDisposable
-    {
-        int depthBytes = 0;
+    public class AudioFrame : IDisposable
+    {     
         int size, offset = 0;
 
-        byte[] sampleBuffer;
+        public int Channels { get; }
+        public int SampleCount { get; }
+        public int BytesPerSample { get; }
+        public int LoadedSamples { get; private set; }
+
+
+        byte[] frameBuffer;
         public Memory<byte> RawData { get; }
 
         /// <summary>
-        /// Creates an empty audio sample with given bit depth using the PCM format.
+        /// Creates an empty audio frame with fixed sample count and given bit depth using signed PCM format.
         /// </summary>
-        public AudioSample(int channels, int bitDepth = 16)
+        /// <param name="bitDepth">Bits per sample (16, 24 or 32)</param>
+        /// <param name="channels">Number of channels</param>
+        /// <param name="sampleCount">Number of samples to store within this frame</param>
+        public AudioFrame(int channels, int sampleCount = 1024, int bitDepth = 16)
         {
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
             if (channels <= 0) throw new InvalidDataException("Channel count has to be bigger than 0!");
+            if (sampleCount <= 0) throw new InvalidDataException("Sample count has to be bigger than 0!");
 
-            this.depthBytes = bitDepth / 8;
-            size = channels * depthBytes;
-            sampleBuffer = new byte[size];
-            RawData = sampleBuffer.AsMemory();
+            this.Channels = channels;
+            this.SampleCount = sampleCount;
+            this.BytesPerSample = bitDepth / 8;
+            size = sampleCount * channels * BytesPerSample;
+
+            frameBuffer = new byte[size];
+            RawData = frameBuffer.AsMemory();
         }
 
         /// <summary>
-        /// Loads sample data from stream.
+        /// Loads audio samples from stream.
         /// </summary>
-        /// <param name="str">Stream containing raw sample data in PCM format</param>
+        /// <param name="str">Stream containing raw audio samples in signed PCM format</param>
         public bool Load(Stream str)
         {
             offset = 0;
 
             while (offset < size)
             {
-                var r = str.Read(sampleBuffer, offset, size - offset);
+                var r = str.Read(frameBuffer, offset, size - offset);
                 if (r <= 0) return false;
                 offset += r;
             }
 
+            LoadedSamples = offset % BytesPerSample;
             return true;
         }
 
         /// <summary>
-        /// Returns part of memory that contains the sample data
+        /// Returns part of memory that contains the sample value
         /// </summary>
+        /// <param name="index">Sample index</param>
         /// <param name="channel">Channel index</param>
-        public Memory<byte> GetValue(int channel) 
+        public Memory<byte> GetSample(int index, int channel) 
         {
-            int index = channel * depthBytes;
-            return RawData.Slice(index, depthBytes);
+            int i = (index * Channels  + channel) * BytesPerSample;
+            return RawData.Slice(i, BytesPerSample);
         }
 
         public void Dispose()
         {
-            sampleBuffer = null;
+            frameBuffer = null;
         }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CryMediaAPI.Audio.Models;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace CryMediaAPI.Audio
 {
@@ -22,7 +19,7 @@ namespace CryMediaAPI.Audio
         public AudioMetadata Metadata { get; private set; }
 
         /// <summary>
-        /// Used for reading metadata and samples from audio files.
+        /// Used for reading metadata and frames from audio files.
         /// </summary>
         /// <param name="filename">Audio file path</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
@@ -90,9 +87,9 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Load the audio and prepare it for reading samples.
+        /// Load the audio and prepare it for reading frames.
         /// </summary>
-        /// <param name="bitDepth">Sample bit rate in which the audio will be processed (16, 24, 32)</param>
+        /// <param name="bitDepth">frame bit rate in which the audio will be processed (16, 24, 32)</param>
         public void Load(int bitDepth = 16)
         {
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
@@ -107,29 +104,30 @@ namespace CryMediaAPI.Audio
         }
 
         /// <summary>
-        /// Loads the next audio sample into memory and returns it. This allocates a new sample.
-        /// Returns 'null' when there is no next sample.
+        /// Loads the next audio frame into memory and returns it. This allocates a new frame.
+        /// Returns 'null' when there is no next frame.
         /// </summary>
-        public AudioSample NextSample()
+        /// <param name="samples">Number of samples to read in a frame</param>
+        public AudioFrame NextFrame(int samples = 1024)
         {
             if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
 
-            var sample = new AudioSample(Metadata.Channels, loadedBitDepth);
-            var success = sample.Load(audioStream);
-            return success ? sample : null;
+            var frame = new AudioFrame(samples, Metadata.Channels, loadedBitDepth);
+            var success = frame.Load(audioStream);
+            return success ? frame : null;
         }
 
         /// <summary>
-        /// Loads the next audio sample into memory and returns it. This overrides the given sample with no extra allocations. Recommended for performance.
-        /// Returns 'null' when there is no next sample.
+        /// Loads the next audio frame into memory and returns it. This allocates a new frame.
+        /// Returns 'null' when there is no next frame.
         /// </summary>
-        /// <param name="sample">Existing sample to be overwritten with new sample data.</param>
-        public AudioSample NextSample(AudioSample sample)
+        /// <param name="frame">Existing frame to be overwritten with new frame data.</param>
+        public AudioFrame NextFrame(AudioFrame frame)
         {
             if (!loadedAudio) throw new InvalidOperationException("Please load the audio first!");
 
-            var success = sample.Load(audioStream);
-            return success ? sample : null;
+            var success = frame.Load(audioStream);
+            return success ? frame : null;
         }
 
         public void Dispose()
