@@ -29,7 +29,7 @@ namespace CryMediaAPI.Audio
             if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing samples!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
-            FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -showmode 0"));
+            FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -nodisp"));
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace CryMediaAPI.Audio
             if (!runPureBackground && OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing samples!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
-            FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -showmode 0"), out Process p);
+            FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -nodisp"), out Process p);
             if (!runPureBackground) ffplayp = p;
             return ffplayp;
         }
@@ -65,7 +65,7 @@ namespace CryMediaAPI.Audio
             catch { }
 
             DataStream = FFmpegWrapper.OpenInput(ffplay, $"-f s{bitDepth}le -channels {channels} -sample_rate {sampleRate} -i -" 
-                + (showFFplayOutput ? "" : " -showmode 0"), 
+                + (showFFplayOutput ? "" : " -nodisp"), 
                 out ffplayp, showFFplayOutput);
 
             OpenedForWriting = true;
