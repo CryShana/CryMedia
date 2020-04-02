@@ -140,6 +140,74 @@ namespace CryMediaAPI.Video
         {
             if (OpenedForWriting) CloseWrite();
         }
+
+        /// <summary>
+        /// Converts given input file to output file.
+        /// </summary>
+        /// <param name="inputFilename">Input video file name/path</param>
+        /// <param name="outputFilename">Input video file name/path</param>
+        /// <param name="options">Output options</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="inputArguments">Input arguments (such as -f, -v:c, -video_size,...)</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public static void FileToFile(string inputFilename, string outputFilename, FFmpegVideoEncoderOptions options, out Process process,
+            string inputArguments = "", bool showOutput = false, string ffmpegExecutable = "ffmpeg")
+        {
+            var output = FFmpegWrapper.ExecuteCommand(ffmpegExecutable, $"{inputArguments} -i \"{inputFilename}\" " +
+                $"-c:v {options.EncoderName} {options.EncoderArguments} -f {options.Format} \"{outputFilename}\"", showOutput);
+
+            process = output;
+        }
+
+        /// <summary>
+        /// Opens output file for writing and returns the input stream.
+        /// </summary>
+        /// <param name="outputFilename">Output video file name/path</param>
+        /// <param name="options">Output options</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="inputArguments">Input arguments (such as -f, -v:c, -video_size,...)</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public static Stream StreamToFile(string outputFilename, FFmpegVideoEncoderOptions options, out Process process,
+            string inputArguments = "", bool showOutput = false, string ffmpegExecutable = "ffmpeg")
+        {
+            var input = FFmpegWrapper.OpenInput(ffmpegExecutable, $"{inputArguments} -i - " +
+                $"-c:v {options.EncoderName} {options.EncoderArguments} -f {options.Format} \"{outputFilename}\"", out process, showOutput);
+
+            return input;
+        }
+
+        /// <summary>
+        /// Uses input file and returns the output stream. Make sure to use a streaming format (like flv).
+        /// </summary>
+        /// <param name="inputFilename">Input video file name/path</param>
+        /// <param name="options">Output options</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="inputArguments">Input arguments (such as -f, -v:c, -video_size,...)</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public static Stream FileToStream(string inputFilename, FFmpegVideoEncoderOptions options, out Process process, 
+            string inputArguments = "", string ffmpegExecutable = "ffmpeg")
+        {
+            var output = FFmpegWrapper.OpenOutput(ffmpegExecutable, $"{inputArguments} -i \"{inputFilename}\" " +
+                $"-c:v {options.EncoderName} {options.EncoderArguments} -f {options.Format} -", out process);
+
+            return output;
+        }
+
+        /// <summary>
+        /// Opens output stream for writing and returns both the input and output streams. Make sure to use a streaming format (like flv).
+        /// </summary>
+        /// <param name="options">Output options</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="inputArguments">Input arguments (such as -f, -v:c, -video_size,...)</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public static (Stream Input, Stream Output) StreamToStream(FFmpegVideoEncoderOptions options, out Process process, 
+            string inputArguments = "", string ffmpegExecutable = "ffmpeg")
+        {
+            var (input, output) = FFmpegWrapper.Open(ffmpegExecutable, $"{inputArguments} -i - " +
+                $"-c:v {options.EncoderName} {options.EncoderArguments} -f {options.Format} -", out process);
+
+            return (input, output);
+        }
     }
 
     /// <summary>

@@ -42,6 +42,32 @@ namespace CryMediaAPI
             return (output, error);
         }
 
+        /// <summary>
+        /// Run given command (arguments) using the given executable name or path. This does not wait for the process to exit or return the output.
+        /// </summary>
+        /// <param name="executable">Executable name or path</param>
+        /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
+        public static Process ExecuteCommand(string executable, string command, bool showOutput = false)
+        {
+            var p = Process.Start(new ProcessStartInfo
+            {
+                FileName = executable,
+                UseShellExecute = false,
+                RedirectStandardError = !showOutput,
+                RedirectStandardOutput = !showOutput,
+                CreateNoWindow = !showOutput,
+                Arguments = $"{command}"
+            });
+
+            if (!showOutput)
+            {
+                p.BeginErrorReadLine();
+                p.BeginOutputReadLine();
+            }
+
+            return p;
+        }
+
         public static Stream OpenOutput(string executable, string command, out Process process)
         {
             process = Process.Start(new ProcessStartInfo

@@ -137,12 +137,80 @@ namespace CryMediaAPI.Audio
         {
             if (OpenedForWriting) CloseWrite();
         }
+
+        /// <summary>
+        /// Converts given input file to output file.
+        /// </summary>
+        /// <param name="inputFilename">Input audio file name/path</param>
+        /// <param name="outputFilename">Input audio file name/path</param>
+        /// <param name="options">Output options</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="inputArguments">Input arguments (such as-f, -channels, -sample_rate,...)</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public static void FileToFile(string inputFilename, string outputFilename, FFmpegAudioEncoderOptions options, out Process process,
+            string inputArguments = "", bool showOutput = false, string ffmpegExecutable = "ffmpeg")
+        {
+            var output = FFmpegWrapper.ExecuteCommand(ffmpegExecutable, $"{inputArguments} -i \"{inputFilename}\" " +
+                $"-c:a {options.EncoderName} {options.EncoderArguments} -f {options.Format} \"{outputFilename}\"", showOutput);
+
+            process = output;
+        }
+
+        /// <summary>
+        /// Opens output file for writing and returns the input stream.
+        /// </summary>
+        /// <param name="outputFilename">Output audio file name/path</param>
+        /// <param name="options">Output options</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="inputArguments">Input arguments (such as -f, -channels, -sample_rate,...)</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public static Stream StreamToFile(string outputFilename, FFmpegAudioEncoderOptions options, out Process process,
+            string inputArguments = "", bool showOutput = false, string ffmpegExecutable = "ffmpeg")
+        {
+            var input = FFmpegWrapper.OpenInput(ffmpegExecutable, $"{inputArguments} -i - " +
+                $"-c:a {options.EncoderName} {options.EncoderArguments} -f {options.Format} \"{outputFilename}\"", out process, showOutput);
+
+            return input;
+        }
+
+        /// <summary>
+        /// Uses input file and returns the output stream.
+        /// </summary>
+        /// <param name="inputFilename">Input audio file name/path</param>
+        /// <param name="options">Output options</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="inputArguments">Input arguments (such as -f, -channels, -sample_rate,...)</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public static Stream FileToStream(string inputFilename, FFmpegAudioEncoderOptions options, out Process process,
+            string inputArguments = "", string ffmpegExecutable = "ffmpeg")
+        {
+            var output = FFmpegWrapper.OpenOutput(ffmpegExecutable, $"{inputArguments} -i \"{inputFilename}\" " +
+                $"-c:a {options.EncoderName} {options.EncoderArguments} -f {options.Format} -", out process);
+
+            return output;
+        }
+
+        /// <summary>
+        /// Opens output stream for writing and returns both the input and output streams.
+        /// </summary>
+        /// <param name="options">Output options</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="inputArguments">Input arguments (such as -f, -channels, -sample_rate,...)</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public static (Stream Input, Stream Output) StreamToStream(FFmpegAudioEncoderOptions options, out Process process,
+            string inputArguments = "", string ffmpegExecutable = "ffmpeg")
+        {
+            var (input, output) = FFmpegWrapper.Open(ffmpegExecutable, $"{inputArguments} -i - " +
+                $"-c:a {options.EncoderName} {options.EncoderArguments} -f {options.Format} -", out process);
+
+            return (input, output);
+        }
     }
 
     /// <summary>
     /// FFmpeg audio encoding options to pass to FFmpeg when encoding. Check the online FFmpeg documentation for more info.
     /// </summary>
-    public class FFmpegAudioEncoderOptions  
+    public class FFmpegAudioEncoderOptions
     {
         /// <summary>
         /// Container format. (example: 'mp3', 'wav', 'flac')
