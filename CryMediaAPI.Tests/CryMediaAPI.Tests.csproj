@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp5.0</TargetFramework>
@@ -7,10 +7,28 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\horse.mp3" />
+    <None Remove="Resources\horse.ogg" />
+    <None Remove="Resources\small.flv" />
+    <None Remove="Resources\small.mp4" />
+    <None Remove="Resources\small.webm" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CryMediaAPI\CryMediaAPI.csproj" />
   </ItemGroup>
 
 </Project>
