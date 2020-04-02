@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.IO;
+using System.Threading;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
 
@@ -8,13 +9,17 @@ namespace CryMediaAPI.Audio
     public class AudioWriter : MediaWriter<AudioFrame>, IDisposable
     {
         string ffmpeg;
-
+        CancellationTokenSource csc;
         internal Process ffmpegp;
 
         public int Channels { get; }
         public int SampleRate { get; }
         public int BitDepth { get; }
-        public FFmpegAudioEncoderOptions EncoderOptions { get; }    
+        public bool UseFilename { get; }
+        public FFmpegAudioEncoderOptions EncoderOptions { get; }
+
+        public Stream DestinationStream { get; private set; }
+        public Stream OutputDataStream { get; private set; }
 
 
         /// <summary>
@@ -31,7 +36,9 @@ namespace CryMediaAPI.Audio
         {
             if (channels <= 0 || sampleRate <= 0) throw new InvalidDataException("Channels/Sample rate have to be bigger than 0!");
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
+            if (string.IsNullOrEmpty(filename)) throw new NullReferenceException("Filename can't be null or empty!");
 
+            UseFilename = true;
             ffmpeg = ffmpegExecutable;
 
             Channels = channels;
@@ -39,6 +46,33 @@ namespace CryMediaAPI.Audio
             SampleRate = sampleRate;
 
             Filename = filename;
+            EncoderOptions = encoderOptions ?? new FFmpegAudioEncoderOptions();
+        }
+
+        /// <summary>
+        /// Used for encoding audio samples into a stream
+        /// </summary>
+        /// <param name="destinationStream">Output stream</param>
+        /// <param name="channels">Input number of channels</param>
+        /// <param name="sampleRate">Input sample rate</param>
+        /// <param name="bitDepth">Input bits per sample</param>
+        /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public AudioWriter(Stream destinationStream, int channels, int sampleRate, int bitDepth = 16,
+            FFmpegAudioEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
+        {
+            if (channels <= 0 || sampleRate <= 0) throw new InvalidDataException("Channels/Sample rate have to be bigger than 0!");
+            if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
+            if (destinationStream == null) throw new NullReferenceException("Stream can't be null!");
+
+            UseFilename = false;
+            ffmpeg = ffmpegExecutable;
+
+            Channels = channels;
+            BitDepth = bitDepth;
+            SampleRate = sampleRate;
+
+            DestinationStream = destinationStream;
             EncoderOptions = encoderOptions ?? new FFmpegAudioEncoderOptions();
         }
 
@@ -51,9 +85,23 @@ namespace CryMediaAPI.Audio
             if (OpenedForWriting) throw new InvalidOperationException("File was already opened for writing!");
             if (File.Exists(Filename)) File.Delete(Filename);
 
-            InputDataStream = FFmpegWrapper.OpenInput(ffmpeg, $"-f s{BitDepth}le -channels {Channels} -sample_rate {SampleRate} -i - " +
-                $"-c:v {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format} \"{Filename}\"",
-                out ffmpegp, showFFmpegOutput);
+            var cmd = $"-f s{BitDepth}le -channels {Channels} -sample_rate {SampleRate} -i - " +
+                $"-c:a {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format}";
+
+            if (UseFilename)
+            {
+                if (File.Exists(Filename)) File.Delete(Filename);
+
+                InputDataStream = FFmpegWrapper.OpenInput(ffmpeg, $"{cmd} \"{Filename}\"", out ffmpegp, showFFmpegOutput);
+            }
+            else
+            {
+                csc = new CancellationTokenSource();
+
+                // using stream
+                (InputDataStream, OutputDataStream) = FFmpegWrapper.Open(ffmpeg, $"{cmd} -", out ffmpegp, showFFmpegOutput);
+                _ = OutputDataStream.CopyToAsync(DestinationStream, csc.Token);
+            }
 
             OpenedForWriting = true;
         }
@@ -67,6 +115,8 @@ namespace CryMediaAPI.Audio
 
             try
             {
+                csc?.Cancel();
+
                 try
                 {
                     if (ffmpegp.HasExited) ffmpegp.Kill();
@@ -74,6 +124,8 @@ namespace CryMediaAPI.Audio
                 catch { }
 
                 InputDataStream.Dispose();
+
+                if (!UseFilename) OutputDataStream?.Dispose();
             }
             finally
             {

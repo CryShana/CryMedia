@@ -1,15 +1,15 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
-using System.Threading;
 
 namespace CryMediaAPI.Video
 {
     public class VideoWriter : MediaWriter<VideoFrame>, IDisposable
     {
         string ffmpeg;
-
+        CancellationTokenSource csc;
         internal Process ffmpegp;
         
         public int Width { get; }
@@ -22,7 +22,7 @@ namespace CryMediaAPI.Video
         public Stream OutputDataStream { get; private set; }
 
 
-        public CancellationTokenSource csc;
+        
 
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace CryMediaAPI.Video
         /// <summary>
         /// Used for encoding frames into a stream (Requires using a supported format like 'flv' for streaming)
         /// </summary>
-        /// <param name="filename">Output stream</param>
+        /// <param name="destinationStream">Output stream</param>
         /// <param name="width">Input width of the video in pixels</param>
         /// <param name="height">Input height of the video in pixels </param>
         /// <param name="framerate">Input framerate of the video in fps</param>
@@ -104,8 +104,7 @@ namespace CryMediaAPI.Video
                 // using stream
                 (InputDataStream, OutputDataStream) = FFmpegWrapper.Open(ffmpeg, $"{cmd} -", out ffmpegp, showFFmpegOutput);
                 _ = OutputDataStream.CopyToAsync(DestinationStream, csc.Token);
-            }
-           
+            }         
 
             OpenedForWriting = true;
         }
