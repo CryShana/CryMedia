@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
 
@@ -93,6 +94,21 @@ namespace CryMediaAPI.Audio
             {
                 OpenedForWriting = false;
             }         
+        }
+
+        /// <summary>
+        /// Get stream for writing and playing audio in custom format.
+        /// </summary>
+        /// <param name="format">Custom audio format</param>
+        /// <param name="arguments">Custom FFmpeg arguments for the specified audio format</param>
+        /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
+        public static Stream GetStreamForWriting(string format, string arguments, out Process ffplayProcess,
+            bool showFFplayOutput = false, string ffplayExecutable = "ffplay")
+        {
+            var str = FFmpegWrapper.OpenInput(ffplayExecutable, $"-f {format} {arguments} -i -",
+                out ffplayProcess, showFFplayOutput);
+
+            return str;
         }
 
         public void Dispose()

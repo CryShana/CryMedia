@@ -70,21 +70,6 @@ namespace CryMediaAPI.Video
         }
 
         /// <summary>
-        /// Get stream for writing and playing video in custom format.
-        /// </summary>
-        /// <param name="format">Custom video format</param>
-        /// <param name="arguments">Custom FFmpeg arguments for the specified video format</param>
-        /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
-        public static Stream GetStreamForWriting(string format, string arguments, out Process ffplayProcess, 
-            bool showFFplayOutput = false, string ffplayExecutable = "ffplay")
-        {
-            var str = FFmpegWrapper.OpenInput(ffplayExecutable, $"-f {format} {arguments} -i -", 
-                out ffplayProcess, showFFplayOutput);
-
-            return str;
-        }
-
-        /// <summary>
         /// Close player for writing frames.
         /// </summary>
         public void CloseWrite()
@@ -105,6 +90,21 @@ namespace CryMediaAPI.Video
             {
                 OpenedForWriting = false;
             }
+        }
+
+        /// <summary>
+        /// Get stream for writing and playing video in custom format.
+        /// </summary>
+        /// <param name="format">Custom video format</param>
+        /// <param name="arguments">Custom FFmpeg arguments for the specified video format</param>
+        /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
+        public static Stream GetStreamForWriting(string format, string arguments, out Process ffplayProcess,
+            bool showFFplayOutput = false, string ffplayExecutable = "ffplay")
+        {
+            var str = FFmpegWrapper.OpenInput(ffplayExecutable, $"-f {format} {arguments} -i -",
+                out ffplayProcess, showFFplayOutput);
+
+            return str;
         }
 
         public void Dispose()
