@@ -11,7 +11,6 @@ namespace CryMediaAPI.Video
 {
     public class VideoReader : MediaReader<VideoFrame, MediaWriter<VideoFrame>>, IDisposable
     {
-        Stream videoStream;
         string ffmpeg, ffprobe;
 
         public long CurrentFrameOffset { get; private set; }
@@ -113,7 +112,7 @@ namespace CryMediaAPI.Video
             if (Metadata.Width == 0 || Metadata.Height == 0) throw new InvalidDataException("Loaded metadata contains errors!");
 
             // we will be reading video in RGB24 format
-            videoStream = FFmpegWrapper.OpenOutput(ffmpeg, $"{(offsetSeconds <= 0 ? "" : $"-ss {offsetSeconds:0.00}")} -i \"{Filename}\"" +
+            DataStream = FFmpegWrapper.OpenOutput(ffmpeg, $"{(offsetSeconds <= 0 ? "" : $"-ss {offsetSeconds:0.00}")} -i \"{Filename}\"" +
                 $" -pix_fmt rgb24 -f rawvideo -");
             OpenedForReading = true;
         }
@@ -137,7 +136,7 @@ namespace CryMediaAPI.Video
         {
             if (!OpenedForReading) throw new InvalidOperationException("Please load the video first!");
 
-            var success = frame.Load(videoStream);
+            var success = frame.Load(DataStream);
             if (success) CurrentFrameOffset++;
             return success ? frame : null;
         }
@@ -153,7 +152,7 @@ namespace CryMediaAPI.Video
 
         public void Dispose()
         {
-            videoStream?.Dispose();
+            DataStream?.Dispose();
         }
     }
 }
