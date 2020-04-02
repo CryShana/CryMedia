@@ -62,7 +62,7 @@ namespace CryMediaAPI.Video
             }
             catch { }
 
-            DataStream = FFmpegWrapper.OpenInput(ffplay, $"-f rawvideo -video_size {width}:{height} -framerate {framerateFrequency} -pixel_format rgb24 -i -",
+            InputDataStream = FFmpegWrapper.OpenInput(ffplay, $"-f rawvideo -video_size {width}:{height} -framerate {framerateFrequency} -pixel_format rgb24 -i -",
                 out ffplayp, showFFplayOutput);
 
             OpenedForWriting = true;
@@ -83,7 +83,7 @@ namespace CryMediaAPI.Video
                 }
                 catch { }
 
-                DataStream.Dispose();
+                InputDataStream.Dispose();
             }
             finally
             {

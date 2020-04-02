@@ -2,6 +2,7 @@
 using System.IO;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
+using System.Threading;
 
 namespace CryMediaAPI.Video
 {
@@ -14,7 +15,14 @@ namespace CryMediaAPI.Video
         public int Width { get; }
         public int Height { get; }
         public double Framerate { get; }
+        public bool UseFilename { get; }
         public FFmpegVideoEncoderOptions EncoderOptions { get; }
+
+        public Stream DestinationStream { get; private set; }
+        public Stream OutputDataStream { get; private set; }
+
+
+        public CancellationTokenSource csc;
 
 
         /// <summary>
@@ -31,28 +39,73 @@ namespace CryMediaAPI.Video
         {
             if (width <= 0 || height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
             if (framerate <= 0) throw new InvalidDataException("Video framerate has to be bigger than 0!");
+            if (string.IsNullOrEmpty(filename)) throw new NullReferenceException("Filename can't be null or empty!");
+
+            UseFilename = true;
+            Filename = filename;
 
             ffmpeg = ffmpegExecutable;
 
             Width = width;
             Height = height;
-            Filename = filename;
             Framerate = framerate;
+            DestinationStream = null;
             EncoderOptions = encoderOptions ?? new FFmpegVideoEncoderOptions();
         }
 
         /// <summary>
-        /// Opens output video file for writing. This will delete any existing file. Call this before writing frames.
+        /// Used for encoding frames into a stream (Requires using a supported format like 'flv' for streaming)
+        /// </summary>
+        /// <param name="filename">Output stream</param>
+        /// <param name="width">Input width of the video in pixels</param>
+        /// <param name="height">Input height of the video in pixels </param>
+        /// <param name="framerate">Input framerate of the video in fps</param>
+        /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
+        /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
+        public VideoWriter(Stream destinationStream, int width, int height, double framerate,
+            FFmpegVideoEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
+        {
+            if (width <= 0 || height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
+            if (framerate <= 0) throw new InvalidDataException("Video framerate has to be bigger than 0!");
+            if (destinationStream == null) throw new NullReferenceException("Stream can't be null!");
+
+            UseFilename = false;
+
+            ffmpeg = ffmpegExecutable;
+
+            Width = width;
+            Height = height;
+            Framerate = framerate;
+            DestinationStream = destinationStream;
+            EncoderOptions = encoderOptions ?? new FFmpegVideoEncoderOptions();
+        }
+
+        /// <summary>
+        /// Prepares for writing.
         /// </summary>
         /// <param name="showFFmpegOutput">Show FFmpeg encoding output for debugging purposes.</param>
         public void OpenWrite(bool showFFmpegOutput = false)
         {
             if (OpenedForWriting) throw new InvalidOperationException("File was already opened for writing!");
-            if (File.Exists(Filename)) File.Delete(Filename);
 
-            DataStream = FFmpegWrapper.OpenInput(ffmpeg, $"-f rawvideo -video_size {Width}:{Height} -r {Framerate} -pixel_format rgb24 -i - " +
-                $"-c:v {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format} \"{Filename}\"",
-                out ffmpegp, showFFmpegOutput);
+            var cmd = $"-f rawvideo -video_size {Width}:{Height} -r {Framerate} -pixel_format rgb24 -i - " +
+                $"-c:v {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format}";
+
+            if (UseFilename)
+            {
+                if (File.Exists(Filename)) File.Delete(Filename);
+
+                InputDataStream = FFmpegWrapper.OpenInput(ffmpeg, $"{cmd} \"{Filename}\"", out ffmpegp, showFFmpegOutput);
+            }
+            else
+            {
+                csc = new CancellationTokenSource();
+
+                // using stream
+                (InputDataStream, OutputDataStream) = FFmpegWrapper.Open(ffmpeg, $"{cmd} -", out ffmpegp, showFFmpegOutput);
+                _ = OutputDataStream.CopyToAsync(DestinationStream, csc.Token);
+            }
+           
 
             OpenedForWriting = true;
         }
@@ -66,13 +119,17 @@ namespace CryMediaAPI.Video
 
             try
             {
+                csc?.Cancel();
+
                 try
                 {
                     if (ffmpegp.HasExited) ffmpegp.Kill();
                 }
                 catch { }
 
-                DataStream.Dispose();
+                InputDataStream.Dispose();
+
+                if (!UseFilename) OutputDataStream?.Dispose();
             }
             finally
             {

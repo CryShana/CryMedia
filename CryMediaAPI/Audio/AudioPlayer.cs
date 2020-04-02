@@ -65,7 +65,7 @@ namespace CryMediaAPI.Audio
             }
             catch { }
 
-            DataStream = FFmpegWrapper.OpenInput(ffplay, $"-f s{bitDepth}le -channels {channels} -sample_rate {sampleRate} -i -" 
+            InputDataStream = FFmpegWrapper.OpenInput(ffplay, $"-f s{bitDepth}le -channels {channels} -sample_rate {sampleRate} -i -" 
                 + (showWindow ? "" : " -nodisp"), 
                 out ffplayp, showFFplayOutput);
 
@@ -87,7 +87,7 @@ namespace CryMediaAPI.Audio
                 }
                 catch { }
 
-                DataStream.Dispose();              
+                InputDataStream.Dispose();              
             }
             finally
             {

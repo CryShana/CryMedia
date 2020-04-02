@@ -51,7 +51,7 @@ namespace CryMediaAPI.Audio
             if (OpenedForWriting) throw new InvalidOperationException("File was already opened for writing!");
             if (File.Exists(Filename)) File.Delete(Filename);
 
-            DataStream = FFmpegWrapper.OpenInput(ffmpeg, $"-f s{BitDepth}le -channels {Channels} -sample_rate {SampleRate} -i - " +
+            InputDataStream = FFmpegWrapper.OpenInput(ffmpeg, $"-f s{BitDepth}le -channels {Channels} -sample_rate {SampleRate} -i - " +
                 $"-c:v {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format} \"{Filename}\"",
                 out ffmpegp, showFFmpegOutput);
 
@@ -73,7 +73,7 @@ namespace CryMediaAPI.Audio
                 }
                 catch { }
 
-                DataStream.Dispose();
+                InputDataStream.Dispose();
             }
             finally
             {

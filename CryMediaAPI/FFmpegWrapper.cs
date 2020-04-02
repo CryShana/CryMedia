@@ -76,6 +76,29 @@ namespace CryMediaAPI
 
             return process.StandardInput.BaseStream;
         }
-        public static Stream OpenInput(string executable, string command, bool showOutput = false) => OpenInput(executable, command, out _, showOutput);        
+        public static Stream OpenInput(string executable, string command, bool showOutput = false) => OpenInput(executable, command, out _, showOutput); 
+        
+        public static (Stream input, Stream output) Open(string executable, string command, out Process process, bool showOutput = false)
+        {
+            process = Process.Start(new ProcessStartInfo
+            {
+                FileName = executable,
+                UseShellExecute = false,
+                RedirectStandardInput = true,
+                RedirectStandardError = !showOutput,
+                RedirectStandardOutput = true,
+                CreateNoWindow = !showOutput,
+                Arguments = $"{command}"
+            });
+
+            if (!showOutput)
+            {
+                process.BeginErrorReadLine();
+            }
+
+            return (process.StandardInput.BaseStream, process.StandardOutput.BaseStream);
+        }
+        public static (Stream input, Stream output) Open(string executable, string command, bool showOutput = false)
+            => Open(executable, command, out _, showOutput);
     }
 }
