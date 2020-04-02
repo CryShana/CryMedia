@@ -33,7 +33,7 @@ namespace CryMediaAPI.BaseClasses
         {
             if (!writer.OpenedForWriting) throw new InvalidOperationException("Writer is not opened for writing!");
 
-            DataStream.CopyTo(writer.DataStream);
+            DataStream.CopyTo(writer.InputDataStream);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace CryMediaAPI.BaseClasses
         {
             if (!writer.OpenedForWriting) throw new InvalidOperationException("Writer is not opened for writing!");
 
-            await DataStream.CopyToAsync(writer.DataStream);
+            await DataStream.CopyToAsync(writer.InputDataStream);
         }
     }
 }

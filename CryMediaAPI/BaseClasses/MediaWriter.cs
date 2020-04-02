@@ -11,9 +11,9 @@ namespace CryMediaAPI.BaseClasses
         public virtual string Filename { get; protected set; }
 
         /// <summary>
-        /// Output raw data stream
+        /// Input data stream
         /// </summary>
-        public virtual Stream DataStream { get; protected set; }
+        public virtual Stream InputDataStream { get; protected set; }
 
         /// <summary>
         /// Is data stream opened for writing
@@ -26,9 +26,9 @@ namespace CryMediaAPI.BaseClasses
         /// <param name="frame">Frame containing media data</param>
         public virtual void WriteFrame(Frame frame)
         {
-            if (!OpenedForWriting) throw new InvalidOperationException("File needs to be opened for writing first!");
+            if (!OpenedForWriting) throw new InvalidOperationException("Media needs to be prepared for writing first!");
 
-            DataStream.Write(frame.RawData.Span);
+            InputDataStream.Write(frame.RawData.Span);
         }
     }
 }
