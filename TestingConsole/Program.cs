@@ -20,7 +20,7 @@ namespace TestingConsole
 
             // ReadPlayAudio(input, output);
             // ReadPlayVideo(input, output);
-
+            
             // SaveVideoFrame(input);
         }
 
@@ -52,10 +52,12 @@ namespace TestingConsole
             video.LoadMetadata().Wait();
             video.Load();
 
-            using (var writer = new VideoWriter(output, video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate))
+            using (var writer = new VideoWriter(File.Create(output), video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate,
+                new FFmpegVideoEncoderOptions() { Format = "flv" }))
             {
-                writer.OpenWrite(false);
-
+                writer.OpenWrite(true);
+                //video.CopyTo(writer);
+                
                 var frame = new VideoFrame(video.Metadata.Width, video.Metadata.Height);
                 while (true)
                 {
@@ -86,7 +88,7 @@ namespace TestingConsole
 
             using (var player = new VideoPlayer())
             {
-                player.OpenWrite(video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerateText, true);
+                player.OpenWrite(video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerateText);
 
                 // For simple playing, can just use "CopyTo"
                 // video.CopyTo(player);
@@ -129,7 +131,7 @@ namespace TestingConsole
 
             using (var player = new AudioPlayer())
             {
-                player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels);
+                player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels, showWindow: false);
                 
                 // For simple playing, can just use "CopyTo"
                 // audio.CopyTo(player);
@@ -162,11 +164,6 @@ namespace TestingConsole
 
             var fr = video.NextFrame();
             fr.Save("test.png");
-        }
-
-        static void ConvertVideo(string input, string output)
-        {
-
         }
     }
 }
