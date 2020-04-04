@@ -209,6 +209,35 @@ player.WriteFrame(sample);
 // dispose manually or use 'using' statement
 player.Dispose();
 ```
+### Conversions
+```csharp
+// This will convert the "from.mp4" video to "to.flv" video
+VideoWriter.FileToFile("from.mp4", "to.flv", new FFmpegVideoEncoderOptions
+{
+    Format = "flv",
+    EncoderName = "h264_nvenc",
+    EncoderArguments = "-preset slow"
+}, out _);
+
+// This will convert the "from.mp4" directly into a stream (example: for streaming video)
+var stream = VideoWriter.FileToStream("from.mp4", new FFmpegVideoEncoderOptions
+{
+    Format = "flv",
+    EncoderName = "h264_nvenc",
+    EncoderArguments = "-preset slow"
+}, out _);
+
+// You can convert from one stream to another stream
+var (input, output) = VideoWriter.StreamToStream(new FFmpegVideoEncoderOptions
+{
+    Format = "flv",
+    EncoderName = "h264_nvenc",
+    EncoderArguments = "-preset slow"
+}, out _);
+
+// Or simply save stream to file using 'StreamToFile'
+```
+
 ## FFmpeg Wrapper
 For specialized needs, you can use the FFmpeg wrapper functions directly using the `FFmpegWrapper` static class.
 
@@ -216,8 +245,3 @@ For specialized needs, you can use the FFmpeg wrapper functions directly using t
 This is a personal project. I might add more features in the future.
 
 You are free to request any wanted features and I will consider adding them.
-
-## Roadmap
-I am planning to implement the following features in the future:
-
-- Reading/Writing videos with multiple streams (together with audio)
