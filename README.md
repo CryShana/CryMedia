@@ -233,7 +233,7 @@ var (input, output) = VideoWriter.StreamToStream(new FFmpegVideoEncoderOptions
     Format = "flv",
     EncoderName = "h264_nvenc",
     EncoderArguments = "-preset slow"
-}, out _);
+}, out _, "-f mp4");  // <-- you can further describe the input stream if required
 
 // Or simply save stream to file using 'StreamToFile'
 ```
