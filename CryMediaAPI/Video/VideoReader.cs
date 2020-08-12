@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CryMediaAPI.BaseClasses;
 using CryMediaAPI.Video.Models;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace CryMediaAPI.Video
 {
@@ -64,8 +65,8 @@ namespace CryMediaAPI.Video
                             int.Parse(videoStream.BitsPerRawSample);
 
                         metadata.Duration = videoStream.Duration == null ? 
-                            double.Parse(metadata.Format.Duration ?? "0") : 
-                            double.Parse(videoStream.Duration);
+                            double.Parse(metadata.Format.Duration ?? "0", CultureInfo.InvariantCulture) : 
+                            double.Parse(videoStream.Duration, CultureInfo.InvariantCulture);
 
                         metadata.SampleAspectRatio = videoStream.SampleAspectRatio;
                         metadata.AvgFramerateText = videoStream.AvgFrameRate;
@@ -74,9 +75,9 @@ namespace CryMediaAPI.Video
                         if (videoStream.AvgFrameRate.Contains('/'))
                         {
                             var parsed = videoStream.AvgFrameRate.Split('/');
-                            metadata.AvgFramerate = double.Parse(parsed[0]) / double.Parse(parsed[1]);
+                            metadata.AvgFramerate = double.Parse(parsed[0], CultureInfo.InvariantCulture) / double.Parse(parsed[1], CultureInfo.InvariantCulture);
                         }
-                        else metadata.AvgFramerate = double.Parse(videoStream.AvgFrameRate);
+                        else metadata.AvgFramerate = double.Parse(videoStream.AvgFrameRate, CultureInfo.InvariantCulture);
 
                         metadata.PredictedFrameCount = (int)(metadata.AvgFramerate * metadata.Duration);
                     }
