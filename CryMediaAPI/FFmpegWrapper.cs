@@ -47,7 +47,7 @@ namespace CryMediaAPI
         /// </summary>
         /// <param name="executable">Executable name or path</param>
         /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
-        /// <param name="showOutput">Show output to terminal. This will not redirect the error stream.</param>
+        /// <param name="showOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
         public static Process ExecuteCommand(string executable, string command, bool showOutput = false)
         {
             var p = Process.Start(new ProcessStartInfo
@@ -55,7 +55,6 @@ namespace CryMediaAPI
                 FileName = executable,
                 UseShellExecute = false,
                 RedirectStandardError = !showOutput,
-                RedirectStandardOutput = !showOutput,
                 CreateNoWindow = !showOutput,
                 Arguments = $"{command}"
             });
@@ -63,12 +62,17 @@ namespace CryMediaAPI
             if (!showOutput)
             {
                 p.BeginErrorReadLine();
-                p.BeginOutputReadLine();
             }
 
             return p;
         }
 
+        /// <summary>
+        /// Run given command (arguments) using the given executable name or path. This redirects the output and error streams and returns the output stream.
+        /// </summary>
+        /// <param name="executable">Executable name or path</param>
+        /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
+        /// <param name="process">FFmpeg process</param>
         public static Stream OpenOutput(string executable, string command, out Process process)
         {
             process = Process.Start(new ProcessStartInfo
@@ -85,8 +89,21 @@ namespace CryMediaAPI
 
             return process.StandardOutput.BaseStream;
         }
+        /// <summary>
+        /// Run given command (arguments) using the given executable name or path. This redirects the output and error streams and returns the output stream.
+        /// This does not return any FFmpeg process.
+        /// </summary>
+        /// <param name="executable">Executable name or path</param>
+        /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
         public static Stream OpenOutput(string executable, string command) => OpenOutput(executable, command, out _);
 
+        /// <summary>
+        /// Run given command (arguments) using the given executable name or path. This redirects the input stream and returns the input stream.
+        /// </summary>
+        /// <param name="executable">Executable name or path</param>
+        /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="showOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
         public static Stream OpenInput(string executable, string command, out Process process, bool showOutput = false)
         {
             process = Process.Start(new ProcessStartInfo
@@ -95,7 +112,6 @@ namespace CryMediaAPI
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardError = !showOutput,
-                RedirectStandardOutput = !showOutput,
                 CreateNoWindow = !showOutput,
                 Arguments = $"{command}"
             });
@@ -108,8 +124,22 @@ namespace CryMediaAPI
 
             return process.StandardInput.BaseStream;
         }
-        public static Stream OpenInput(string executable, string command, bool showOutput = false) => OpenInput(executable, command, out _, showOutput); 
-        
+        /// <summary>
+        /// Run given command (arguments) using the given executable name or path. This redirects the input stream and returns the input stream.
+        /// This does not return any FFmpeg process.
+        /// </summary>
+        /// <param name="executable">Executable name or path</param>
+        /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
+        /// <param name="showOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
+        public static Stream OpenInput(string executable, string command, bool showOutput = false) => OpenInput(executable, command, out _, showOutput);
+
+        /// <summary>
+        /// Run given command (arguments) using the given executable name or path. This redirects the input and output streams and returns them.
+        /// </summary>
+        /// <param name="executable">Executable name or path</param>
+        /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
+        /// <param name="process">FFmpeg process</param>
+        /// <param name="showOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
         public static (Stream input, Stream output) Open(string executable, string command, out Process process, bool showOutput = false)
         {
             process = Process.Start(new ProcessStartInfo
@@ -130,6 +160,13 @@ namespace CryMediaAPI
 
             return (process.StandardInput.BaseStream, process.StandardOutput.BaseStream);
         }
+        /// <summary>
+        /// Run given command (arguments) using the given executable name or path. This redirects the input and output streams and returns them.
+        /// This does not return any FFmpeg process.
+        /// </summary>
+        /// <param name="executable">Executable name or path</param>
+        /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
+        /// <param name="showOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
         public static (Stream input, Stream output) Open(string executable, string command, bool showOutput = false)
             => Open(executable, command, out _, showOutput);
 
@@ -172,8 +209,7 @@ namespace CryMediaAPI
         }
 
         /// <summary>
-        /// Take a running FFmpeg process with a redirected Error stream and try to parse progress. Requires a total media duration in seconds.
-        /// 
+        /// Take a running FFmpeg process with a redirected Error stream and try to parse progress. Requires the total media duration in seconds.
         /// </summary>
         /// <param name="ffmpegProcess">Running FFmpeg process with redirected Error stream</param>
         /// <param name="duration">Media duration in seconds</param>
