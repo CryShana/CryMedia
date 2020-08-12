@@ -71,7 +71,7 @@ namespace CryMediaAPI.Tests
                     reader.Metadata.Width,
                     reader.Metadata.Height,
                     reader.Metadata.AvgFramerate,
-                    new FFmpegVideoEncoderOptions()))
+                    FFmpegVideoEncoderOptions.H264))
                 {
                     writer.OpenWrite();
 
@@ -85,6 +85,7 @@ namespace CryMediaAPI.Tests
                 using var video = new VideoReader(opath);
                 await video.LoadMetadataAsync();
 
+                Assert.True(video.Metadata.Codec == "h264");
                 Assert.True(video.Metadata.AvgFramerate == reader.Metadata.AvgFramerate);
                 Assert.True(Math.Abs(video.Metadata.Duration - reader.Metadata.Duration) < 0.01);
                 Assert.True(video.Metadata.Width == reader.Metadata.Width);

@@ -225,6 +225,58 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Arguments for the encoder. This depends on the used encoder.
         /// </summary>
-        public string EncoderArguments { get; set; } = "-ar 44100 -ac 2 -b:a 192k";
+        public string EncoderArguments { get; set; } = "-ar 44100 -b:a 192k";
+
+        // PRESETS
+
+        /// <summary>
+        /// MP3 encoder preset
+        /// </summary>
+        public static FFmpegAudioEncoderOptions MP3 => new FFmpegAudioEncoderOptions()
+        {
+            Format = "mp3",
+            EncoderName = "libmp3lame",
+            EncoderArguments = "-ar 44100 -b:a 192k"
+        };
+
+        /// <summary>
+        /// OGG encoder preset
+        /// </summary>
+        public static FFmpegAudioEncoderOptions OGG => new FFmpegAudioEncoderOptions()
+        {
+            Format = "ogg",
+            EncoderName = "libvorbis",
+            EncoderArguments = "-b:a 8k"
+        };
+
+        /// <summary>
+        /// WAV encoder preset
+        /// </summary>
+        public static FFmpegAudioEncoderOptions WAV => new FFmpegAudioEncoderOptions()
+        {
+            Format = "wav",
+            EncoderName = "pcm_s16le",
+            EncoderArguments = "-ar 44100"
+        };
+
+        /// <summary>
+        /// FLAC encoder preset
+        /// </summary>
+        public static FFmpegAudioEncoderOptions FLAC => new FFmpegAudioEncoderOptions()
+        {
+            Format = "flac",
+            EncoderName = "flac",
+            EncoderArguments = ""
+        };
+
+        /// <summary>
+        /// AAC encoder preset
+        /// </summary>
+        public static FFmpegAudioEncoderOptions AAC => new FFmpegAudioEncoderOptions()
+        {
+            Format = "aac",
+            EncoderName = "aac",
+            EncoderArguments = "-b:a 128k"
+        };
     }
 }

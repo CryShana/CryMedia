@@ -68,7 +68,7 @@ namespace CryMediaAPI.Tests
                 using (var writer = new AudioWriter(opath, 
                     reader.Metadata.Channels, 
                     reader.Metadata.SampleRate, 16,
-                    new FFmpegAudioEncoderOptions()))
+                    FFmpegAudioEncoderOptions.MP3))
                 {
                     writer.OpenWrite();
 
@@ -82,6 +82,7 @@ namespace CryMediaAPI.Tests
                 using var audio = new AudioReader(opath);
                 await audio.LoadMetadataAsync();
 
+                Assert.True(audio.Metadata.Format.FormatName == "mp3");
                 Assert.True(audio.Metadata.Channels == 2);
                 Assert.True(audio.Metadata.Streams.Length == 1);
                 Assert.True(Math.Abs(audio.Metadata.Duration - 1.515102) < 0.2);              
