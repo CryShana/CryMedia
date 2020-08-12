@@ -225,6 +225,58 @@ namespace CryMediaAPI.Video
         /// <summary>
         /// Arguments for the encoder. This depends on the used encoder.
         /// </summary>
-        public string EncoderArguments { get; set; } = "-preset veryfast -crf 23 -c:a copy";
+        public string EncoderArguments { get; set; } = "-preset veryfast -crf 23";
+
+        // PRESETS
+
+        /// <summary>
+        /// H.264 encoder preset
+        /// </summary>
+        public static FFmpegVideoEncoderOptions H264 => new FFmpegVideoEncoderOptions()
+        {
+            Format = "mp4",
+            EncoderName = "libx264",
+            EncoderArguments = "-preset veryfast -crf 23"
+        };
+
+        /// <summary>
+        /// H.265 encoder preset
+        /// </summary>
+        public static FFmpegVideoEncoderOptions H265 => new FFmpegVideoEncoderOptions()
+        {
+            Format = "mp4",
+            EncoderName = "libx265",
+            EncoderArguments = "-preset veryfast -crf 23"
+        };
+
+        /// <summary>
+        /// VP8 encoder preset
+        /// </summary>
+        public static FFmpegVideoEncoderOptions VP8 => new FFmpegVideoEncoderOptions()
+        {
+            Format = "webm",
+            EncoderName = "libvpx",
+            EncoderArguments = "-crf 30"
+        };
+
+        /// <summary>
+        /// VP9 encoder preset
+        /// </summary>
+        public static FFmpegVideoEncoderOptions VP9 => new FFmpegVideoEncoderOptions()
+        {
+            Format = "webm",
+            EncoderName = "libvpx-vp9",
+            EncoderArguments = "-crf 30"
+        };
+
+        /// <summary>
+        /// H.264 NVENC encoder preset
+        /// </summary>
+        public static FFmpegVideoEncoderOptions H264_Nvenc => new FFmpegVideoEncoderOptions()
+        {
+            Format = "mp4",
+            EncoderName = "h264_nvenc",
+            EncoderArguments = "-preset fast -rc:v vbr_hq -cq:v 19"
+        };
     }
 }
