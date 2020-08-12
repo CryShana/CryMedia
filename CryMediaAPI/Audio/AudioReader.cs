@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CryMediaAPI.BaseClasses;
 using CryMediaAPI.Audio.Models;
+using System.Globalization;
 
 namespace CryMediaAPI.Audio
 {
@@ -58,8 +59,8 @@ namespace CryMediaAPI.Audio
                             int.Parse(audioStream.SampleRate);
 
                         metadata.Duration = audioStream.Duration == null ? 
-                            double.Parse(metadata.Format.Duration ?? "-1") : 
-                            double.Parse(audioStream.Duration);
+                            double.Parse(metadata.Format.Duration ?? "-1", CultureInfo.InvariantCulture) : 
+                            double.Parse(audioStream.Duration, CultureInfo.InvariantCulture);
 
                         metadata.BitRate = audioStream.BitRate == null ? -1 : 
                             int.Parse(audioStream.BitRate);
