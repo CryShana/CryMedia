@@ -98,7 +98,7 @@ namespace CryMediaAPI
         public static Stream OpenOutput(string executable, string command) => OpenOutput(executable, command, out _);
 
         /// <summary>
-        /// Run given command (arguments) using the given executable name or path. This redirects the input stream and returns the input stream.
+        /// Run given command (arguments) using the given executable name or path. This redirects the input stream and returns it.
         /// </summary>
         /// <param name="executable">Executable name or path</param>
         /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
@@ -119,13 +119,12 @@ namespace CryMediaAPI
             if (!showOutput)
             {
                 process.BeginErrorReadLine();
-                process.BeginOutputReadLine();
             }
 
             return process.StandardInput.BaseStream;
         }
         /// <summary>
-        /// Run given command (arguments) using the given executable name or path. This redirects the input stream and returns the input stream.
+        /// Run given command (arguments) using the given executable name or path. This redirects the input stream and returns it.
         /// This does not return any FFmpeg process.
         /// </summary>
         /// <param name="executable">Executable name or path</param>

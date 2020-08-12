@@ -53,5 +53,41 @@ namespace CryMediaAPI.Tests
                 if (File.Exists(opath)) File.Delete(opath);
             }
         }
+
+        [Fact]
+        public async Task ConversionTest()
+        {
+            var path = Res.GetPath(Res.Audio_Ogg);
+            var opath = "out-test-2.mp3";
+
+            try
+            {
+                using var reader = new AudioReader(path);
+                await reader.LoadMetadataAsync();
+
+                using (var writer = new AudioWriter(opath, 
+                    reader.Metadata.Channels, 
+                    reader.Metadata.SampleRate, 16,
+                    new FFmpegAudioEncoderOptions()))
+                {
+                    writer.OpenWrite();
+
+                    reader.Load();
+
+                    await reader.CopyToAsync(writer);
+                }
+
+                using var audio = new AudioReader(opath);
+                await audio.LoadMetadataAsync();
+
+                Assert.True(audio.Metadata.Channels == 2);
+                Assert.True(audio.Metadata.Streams.Length == 1);
+                Assert.True(Math.Abs(audio.Metadata.Duration - 1.515102) < 0.2);
+            }
+            finally
+            {
+                if (File.Exists(opath)) File.Delete(opath);
+            }
+        }
     }
 }

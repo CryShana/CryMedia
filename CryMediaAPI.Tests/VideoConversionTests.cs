@@ -88,7 +88,7 @@ namespace CryMediaAPI.Tests
                 Assert.True(video.Metadata.Width == reader.Metadata.Width);
                 Assert.True(video.Metadata.Height == reader.Metadata.Height);
                 Assert.True(video.Metadata.BitDepth == reader.Metadata.BitDepth);
-                Assert.True(video.Metadata.Streams.Length == reader.Metadata.Streams.Length);
+                Assert.True(video.Metadata.Streams.Length == 1);  // only video
             }
             finally
             {

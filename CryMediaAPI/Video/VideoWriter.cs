@@ -22,9 +22,6 @@ namespace CryMediaAPI.Video
         public Stream OutputDataStream { get; private set; }
 
 
-        
-
-
         /// <summary>
         /// Used for encoding frames into a new video file
         /// </summary>
