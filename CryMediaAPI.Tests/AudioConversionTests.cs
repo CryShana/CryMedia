@@ -77,12 +77,14 @@ namespace CryMediaAPI.Tests
                     await reader.CopyToAsync(writer);
                 }
 
+                await Task.Delay(200);
+
                 using var audio = new AudioReader(opath);
                 await audio.LoadMetadataAsync();
 
                 Assert.True(audio.Metadata.Channels == 2);
                 Assert.True(audio.Metadata.Streams.Length == 1);
-                Assert.True(Math.Abs(audio.Metadata.Duration - 1.515102) < 0.2);
+                Assert.True(Math.Abs(audio.Metadata.Duration - 1.515102) < 0.2);              
             }
             finally
             {
