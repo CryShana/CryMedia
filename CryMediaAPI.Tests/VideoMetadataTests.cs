@@ -13,7 +13,7 @@ namespace CryMediaAPI.Tests
         {
             var video = new VideoReader(Res.GetPath(Res.Video_Mp4));
 
-            await video.LoadMetadata();
+            await video.LoadMetadataAsync();
 
             Assert.True(video.Metadata.Codec == "h264");
             Assert.True(video.Metadata.AvgFramerate == 30);
@@ -32,7 +32,7 @@ namespace CryMediaAPI.Tests
         {
             var video = new VideoReader(Res.GetPath(Res.Video_Webm));
 
-            await video.LoadMetadata();
+            await video.LoadMetadataAsync();
 
             Assert.True(video.Metadata.Codec == "vp8");
             Assert.True(video.Metadata.AvgFramerate == 30);
@@ -49,7 +49,7 @@ namespace CryMediaAPI.Tests
         {
             var video = new VideoReader(Res.GetPath(Res.Video_Flv));
 
-            await video.LoadMetadata();
+            await video.LoadMetadataAsync();
 
             Assert.True(video.Metadata.Codec == "flv1");
             Assert.True(video.Metadata.AvgFramerate == 25);

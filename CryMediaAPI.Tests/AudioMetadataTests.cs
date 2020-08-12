@@ -13,7 +13,7 @@ namespace CryMediaAPI.Tests
         {
             var audio = new AudioReader(Res.GetPath(Res.Audio_Mp3));
 
-            await audio.LoadMetadata();
+            await audio.LoadMetadataAsync();
 
             Assert.True(audio.Metadata.Codec == "mp3");
             Assert.True(audio.Metadata.BitRate == 128000);
@@ -29,7 +29,7 @@ namespace CryMediaAPI.Tests
         {
             var audio = new AudioReader(Res.GetPath(Res.Audio_Ogg));
 
-            await audio.LoadMetadata();
+            await audio.LoadMetadataAsync();
 
             Assert.True(audio.Metadata.Codec == "vorbis");
             Assert.True(audio.Metadata.BitRate == 48000);
