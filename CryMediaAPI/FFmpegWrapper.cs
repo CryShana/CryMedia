@@ -47,6 +47,7 @@ namespace CryMediaAPI
         /// </summary>
         /// <param name="executable">Executable name or path</param>
         /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
+        /// <param name="showOutput">Show output to terminal. This will not redirect the error stream.</param>
         public static Process ExecuteCommand(string executable, string command, bool showOutput = false)
         {
             var p = Process.Start(new ProcessStartInfo
@@ -168,6 +169,41 @@ namespace CryMediaAPI
                     t == "DE" ? MuxingSupport.MuxDemux : (t == "D" ? MuxingSupport.Demux : MuxingSupport.Mux)));
             }
             return data;
+        }
+
+        /// <summary>
+        /// Take a running FFmpeg process with a redirected Error stream and try to parse progress. Requires a total media duration in seconds.
+        /// 
+        /// </summary>
+        /// <param name="ffmpegProcess">Running FFmpeg process with redirected Error stream</param>
+        /// <param name="duration">Media duration in seconds</param>
+        public static Progress<double> RegisterProgressTracker(Process ffmpegProcess, double duration)
+        {
+            var prg = new Progress<double>();
+            var iprg = (IProgress<double>)prg;
+
+            var rgx = new Regex(@"^(frame=\s*?(?<frame>\d+)\s*?)?(fps=\s*?\d+\.?\d*?\s+?)?(q=\s*?[\-0-9\.]+\s*?)?\w+?=\s*?\d+[kMBGTb]+\s*?time=(?<h>\d+):(?<m>\d+):(?<s>[0-9\.]+?)\s", RegexOptions.Compiled);
+            
+            ffmpegProcess.ErrorDataReceived += (sender, d) =>
+            {
+                if (string.IsNullOrEmpty(d.Data)) return;
+
+                var match = rgx.Match(d.Data);
+                if (match.Success)
+                {
+                    var hours = int.Parse(match.Groups["h"].Value);
+                    var minutes = int.Parse(match.Groups["m"].Value);
+                    var seconds = double.Parse(match.Groups["s"].Value);
+                    seconds = seconds + (60 * minutes) + (60 * 60 * hours);
+
+                    var progress = (seconds / duration) * 100;
+                    if (progress > 100) progress = 100;
+
+                    iprg.Report(progress);
+                }
+            };
+
+            return prg;
         }
 
         public enum MediaType

@@ -27,7 +27,7 @@ namespace TestingConsole
         static void ReadWriteAudio(string input, string output)
         {
             var audio = new AudioReader(input);
-            audio.LoadMetadata().Wait();
+            audio.LoadMetadataAsync().Wait();
             audio.Load();
 
             using (var writer = new AudioWriter(output, audio.Metadata.Channels, audio.Metadata.SampleRate))
@@ -49,7 +49,7 @@ namespace TestingConsole
         static void ReadWriteVideo(string input, string output)
         {
             var video = new VideoReader(input);
-            video.LoadMetadata().Wait();
+            video.LoadMetadataAsync().Wait();
             video.Load();
 
             using (var writer = new VideoWriter(File.Create(output), video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate,
@@ -83,7 +83,7 @@ namespace TestingConsole
         static void ReadPlayVideo(string input, string output)
         {
             var video = new VideoReader(input);
-            video.LoadMetadata().Wait();
+            video.LoadMetadataAsync().Wait();
             video.Load();     
 
             using (var player = new VideoPlayer())
@@ -126,7 +126,7 @@ namespace TestingConsole
         static void ReadPlayAudio(string input, string output)
         {
             var audio = new AudioReader(input);
-            audio.LoadMetadata().Wait();
+            audio.LoadMetadataAsync().Wait();
             audio.Load();
 
             using (var player = new AudioPlayer())
@@ -159,7 +159,7 @@ namespace TestingConsole
         static void SaveVideoFrame(string input)
         {
             var video = new VideoReader(input);
-            video.LoadMetadata().Wait();
+            video.LoadMetadataAsync().Wait();
             video.Load(60.5);
 
             var fr = video.NextFrame();

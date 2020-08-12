@@ -37,7 +37,12 @@ namespace CryMediaAPI.Video
         /// <summary>
         /// Load video metadata into memory.
         /// </summary>
-        public async Task LoadMetadata(bool ignoreStreamErrors = false)
+        public void LoadMetadata(bool ignoreStreamErrors = false) => LoadMetadataAsync(ignoreStreamErrors).Wait();
+
+        /// <summary>
+        /// Load video metadata into memory.
+        /// </summary>
+        public async Task LoadMetadataAsync(bool ignoreStreamErrors = false)
         {
             if (LoadedMetadata) throw new InvalidOperationException("Video metadata is already loaded!");
             var r = FFmpegWrapper.OpenOutput(ffprobe, $"-i \"{Filename}\" -v quiet -print_format json=c=1 -show_format -show_streams");
