@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CryMediaAPI.Tests
 {
-    public class VideoMetadataTests
+    public class VideoReaderTests
     {
         [Fact]
         public async Task LoadMetadataMp4()  
@@ -60,6 +60,56 @@ namespace CryMediaAPI.Tests
             Assert.True(video.Metadata.BitRate == 800000);
             Assert.True(video.Metadata.PixelFormat == "yuv420p");
             Assert.True(video.Metadata.Streams.Length == 2); 
+        }
+
+        [Fact]
+        public async Task LoadAtOffset1()
+        {
+            using var video = new VideoReader(Res.GetPath(Res.Video_Flv));
+            var second = 3;
+
+            await video.LoadMetadataAsync();
+
+            var at_frame = (second * video.Metadata.PredictedFrameCount) / video.Metadata.Duration;
+            var frames_left = (int)Math.Round(video.Metadata.PredictedFrameCount - at_frame);
+
+            video.Load(second);
+
+            int count = 1;
+            var frame = video.NextFrame();
+            while (true)
+            {
+                frame = video.NextFrame(frame);
+                if (frame == null) break;
+                count++;
+            }
+
+            Assert.True(frames_left == count);
+        }
+
+        [Fact]
+        public async Task LoadAtOffset2()
+        {
+            using var video = new VideoReader(Res.GetPath(Res.Video_Mp4));
+            var second = 4;
+
+            await video.LoadMetadataAsync();
+
+            var at_frame = (second * video.Metadata.PredictedFrameCount) / video.Metadata.Duration;
+            var frames_left = (int)Math.Round(video.Metadata.PredictedFrameCount - at_frame);
+
+            video.Load(second);
+
+            int count = 1;
+            var frame = video.NextFrame();
+            while (true)
+            {
+                frame = video.NextFrame(frame);
+                if (frame == null) break;
+                count++;
+            }
+
+            Assert.True(frames_left == count);
         }
     }
 }
