@@ -119,15 +119,20 @@ namespace CryMediaAPI.Video
             {
                 csc?.Cancel();
 
-                try
-                {
-                    if (ffmpegp.HasExited) ffmpegp.Kill();
-                }
-                catch { }
-
                 InputDataStream.Dispose();
 
                 if (!UseFilename) OutputDataStream?.Dispose();
+
+                try
+                {
+                    if (ffmpegp?.HasExited == false)
+                    {
+                        ffmpegp.WaitForExit(500);
+
+                        if (ffmpegp.HasExited == false) ffmpegp.Kill();
+                    }
+                }
+                catch { }
             }
             finally
             {
