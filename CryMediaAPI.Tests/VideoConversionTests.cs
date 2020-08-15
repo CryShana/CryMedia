@@ -15,7 +15,7 @@ namespace CryMediaAPI.Tests
         public async Task FFmpegWrapperProgressTest()
         {
             var path = Res.GetPath(Res.Video_Mp4);
-            var opath = "out-test.mp4";
+            var opath = "out-test-v-0.mp4";
 
             double lastval = -1;
 
@@ -60,7 +60,7 @@ namespace CryMediaAPI.Tests
         public async Task ConversionTest()
         {
             var path = Res.GetPath(Res.Video_Mp4);
-            var opath = "out-test-2.mp4";
+            var opath = "out-test-v-1.mp4";
 
             try
             {
@@ -86,6 +86,53 @@ namespace CryMediaAPI.Tests
                 Assert.True(video.Metadata.Codec == "h264");
                 Assert.True(video.Metadata.AvgFramerate == reader.Metadata.AvgFramerate);
                 Assert.True(Math.Abs(video.Metadata.Duration - reader.Metadata.Duration) < 0.01);
+                Assert.True(video.Metadata.Width == reader.Metadata.Width);
+                Assert.True(video.Metadata.Height == reader.Metadata.Height);
+                Assert.True(video.Metadata.BitDepth == reader.Metadata.BitDepth);
+                Assert.True(video.Metadata.Streams.Length == 1);  // only video
+            }
+            finally
+            {
+                if (File.Exists(opath)) File.Delete(opath);
+            }
+        }
+
+        [Fact]
+        public async Task ConversionStreamTest()
+        {
+            var path = Res.GetPath(Res.Video_Mp4);
+            var opath = "out-test-v-2.mp4";
+
+            try
+            {
+                using var reader = new VideoReader(path);
+                await reader.LoadMetadataAsync();
+
+                var encoder = FFmpegVideoEncoderOptions.H264;
+                encoder.Format = "flv";
+
+                using (var filestream = File.Create(opath))
+                {
+                    using (var writer = new VideoWriter(filestream,
+                        reader.Metadata.Width,
+                        reader.Metadata.Height,
+                        reader.Metadata.AvgFramerate,
+                        encoder))
+                    {
+                        writer.OpenWrite();
+
+                        reader.Load();
+
+                        await reader.CopyToAsync(writer);
+                    }
+                }
+
+                using var video = new VideoReader(opath);
+                await video.LoadMetadataAsync();
+
+                Assert.True(video.Metadata.Codec == "h264");
+                Assert.True(video.Metadata.AvgFramerate == reader.Metadata.AvgFramerate);
+                //Assert.True(Math.Abs(video.Metadata.Duration - reader.Metadata.Duration) < 0.01);
                 Assert.True(video.Metadata.Width == reader.Metadata.Width);
                 Assert.True(video.Metadata.Height == reader.Metadata.Height);
                 Assert.True(video.Metadata.BitDepth == reader.Metadata.BitDepth);

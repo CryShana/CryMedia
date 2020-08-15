@@ -210,7 +210,7 @@ namespace CryMediaAPI.Video
                 connected_socket?.Close();
                 socket?.Close();
 
-                if (!UseFilename) DestinationStream?.Dispose();
+                if (!UseFilename) OutputDataStream?.Dispose();
 
                 try
                 {
