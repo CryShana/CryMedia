@@ -124,11 +124,9 @@ namespace CryMediaAPI.Audio
 
                 try
                 {
-                    if (ffmpegp?.HasExited == false)
+                    if (ffmpegp?.HasExited == false && !ffmpegp.WaitForExit(500))
                     {
-                        ffmpegp.WaitForExit(500);
-
-                        if (ffmpegp.HasExited == false) ffmpegp.Kill();
+                        ffmpegp.Kill();
                     }
                 }
                 catch { }

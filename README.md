@@ -272,7 +272,7 @@ var progress = FFmpegWrapper.RegisterProgressTracker(writer.CurrentFFmpegProcess
 progress.ProgressChanged += (s, p) => Console.WriteLine($"{p:0.00}%");
 
 // Copy raw data directly from stream to stream
-var t1 = vreader.DataStream.CopyToAsync(writer.InputDataStream);
+var t1 = vreader.DataStream.CopyToAsync(writer.InputDataStreamVideo);
 var t2 = areader.DataStream.CopyToAsync(writer.InputDataStreamAudio);
 
 Task.WaitAll(t1, t2);
