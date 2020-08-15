@@ -14,10 +14,9 @@ namespace CryMediaAPI.Video
     {
         string ffmpeg;
         Socket socket;
+        Socket connected_socket;
         CancellationTokenSource csc;
         internal Process ffmpegp;
-
-        public int TcpTimeoutMs { get; }
 
         public Process CurrentFFmpegProcess => ffmpegp;
 
@@ -73,13 +72,11 @@ namespace CryMediaAPI.Video
         /// <param name="audio_bitDepth">Input audio bits per sample</param>
         /// <param name="videoEncoderOptions">Video encoding options that will be passed to FFmpeg</param>
         /// <param name="audioEncoderOptions">Audio encoding options that will be passed to FFmpeg</param>
-        /// <param name="tcp_timeout_ms">TCP timeout error will be thrown by FFmpeg if audio data is not received within this timeout window</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public AudioVideoWriter(string filename, int video_width, int video_height, double video_framerate,
             int audio_channels, int audio_sampleRate, int audio_bitDepth, 
             FFmpegVideoEncoderOptions videoEncoderOptions, 
             FFmpegAudioEncoderOptions audioEncoderOptions, 
-            int tcp_timeout_ms = 100,
             string ffmpegExecutable = "ffmpeg")
         {
             if (video_width <= 0 || video_height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
@@ -101,7 +98,6 @@ namespace CryMediaAPI.Video
             AudioBitDepth = audio_bitDepth;
             AudioEncoderOptions = audioEncoderOptions;
 
-            TcpTimeoutMs = tcp_timeout_ms;
             ffmpeg = ffmpegExecutable;
         }
 
@@ -117,13 +113,11 @@ namespace CryMediaAPI.Video
         /// <param name="audio_bitDepth">Input audio bits per sample</param>
         /// <param name="videoEncoderOptions">Video encoding options that will be passed to FFmpeg</param>
         /// <param name="audioEncoderOptions">Audio encoding options that will be passed to FFmpeg</param>
-        /// <param name="tcp_timeout_ms">TCP timeout error will be thrown by FFmpeg if audio data is not received within this timeout window</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public AudioVideoWriter(Stream outputStream, int video_width, int video_height, double video_framerate,
             int audio_channels, int audio_sampleRate, int audio_bitDepth,
             FFmpegVideoEncoderOptions videoEncoderOptions,
             FFmpegAudioEncoderOptions audioEncoderOptions,
-            int tcp_timeout_ms = 100,
             string ffmpegExecutable = "ffmpeg")
         {
             if (video_width <= 0 || video_height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
@@ -145,7 +139,6 @@ namespace CryMediaAPI.Video
             AudioBitDepth = audio_bitDepth;
             AudioEncoderOptions = audioEncoderOptions;
 
-            TcpTimeoutMs = tcp_timeout_ms;
             ffmpeg = ffmpegExecutable;
         }
 
@@ -167,13 +160,13 @@ namespace CryMediaAPI.Video
             var port = ((IPEndPoint)socket.LocalEndPoint).Port;
             socket.BeginAccept(r =>
             {
-                var s = socket.EndAccept(r);
-                InputDataStreamAudio = new NetworkStream(s);
+                connected_socket = socket.EndAccept(r);
+                InputDataStreamAudio = new NetworkStream(connected_socket);
                 manual.Set();
             }, null); 
 
             var cmd = $"-f s{AudioBitDepth}le -channels {AudioChannels} -sample_rate {AudioSampleRate} " +
-                $"-thread_queue_size {thread_queue_size} -i \"tcp://{IPAddress.Loopback}:{port}?timeout={(TcpTimeoutMs * 1000)}\" " + 
+                $"-thread_queue_size {thread_queue_size} -i \"tcp://{IPAddress.Loopback}:{port}\" " + 
                 $"-f rawvideo -video_size {VideoWidth}:{VideoHeight} -r {VideoFramerate} " +
                 $"-thread_queue_size {thread_queue_size} -pixel_format rgb24 -i - " +
                 $"-map 0 -c:a {AudioEncoderOptions.EncoderName} {AudioEncoderOptions.EncoderArguments} " +
@@ -210,22 +203,18 @@ namespace CryMediaAPI.Video
             {
                 csc?.Cancel();
 
-                try
-                {
-                    InputDataStreamAudio?.Close();
-                    InputDataStreamAudio = null;
-                    socket.Dispose();
-                    socket = null;
-                }
-                catch { }
+                InputDataStreamAudio?.Close();
+                InputDataStreamVideo?.Close();
 
-                InputDataStreamVideo.Dispose();
+                connected_socket?.Shutdown(SocketShutdown.Both);
+                connected_socket?.Close();
+                socket?.Close();
 
                 if (!UseFilename) DestinationStream?.Dispose();
 
                 try
                 {
-                    if (ffmpegp?.HasExited == false && !ffmpegp.WaitForExit(TcpTimeoutMs + 500))
+                    if (ffmpegp?.HasExited == false && !ffmpegp.WaitForExit(500))
                     {     
                         ffmpegp.Kill();
                     }
