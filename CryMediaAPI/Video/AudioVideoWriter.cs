@@ -182,12 +182,6 @@ namespace CryMediaAPI.Video
 
                 try
                 {
-                    if (ffmpegp.HasExited) ffmpegp.Kill();
-                }
-                catch { }
-
-                try
-                {
                     InputDataStreamAudio?.Close();
                     InputDataStreamAudio = null;
                     socket.Disconnect(false);
@@ -197,8 +191,18 @@ namespace CryMediaAPI.Video
                 catch { }
 
                 InputDataStream.Dispose();
-                
                 if (!UseFilename) DestinationStream?.Dispose();
+
+                try
+                {
+                    if (ffmpegp?.HasExited == false)
+                    {
+                        ffmpegp.WaitForExit(500);
+
+                        if (ffmpegp.HasExited == false) ffmpegp.Kill();
+                    }
+                }
+                catch { }
             }
             finally
             {

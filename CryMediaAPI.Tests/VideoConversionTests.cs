@@ -80,8 +80,6 @@ namespace CryMediaAPI.Tests
                     await reader.CopyToAsync(writer);
                 }
 
-                await Task.Delay(200);
-
                 using var video = new VideoReader(opath);
                 await video.LoadMetadataAsync();
 

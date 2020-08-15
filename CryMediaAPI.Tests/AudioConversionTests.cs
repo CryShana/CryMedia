@@ -77,8 +77,6 @@ namespace CryMediaAPI.Tests
                     await reader.CopyToAsync(writer);
                 }
 
-                await Task.Delay(200);
-
                 using var audio = new AudioReader(opath);
                 await audio.LoadMetadataAsync();
 
