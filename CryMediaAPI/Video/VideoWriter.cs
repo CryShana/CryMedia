@@ -122,7 +122,7 @@ namespace CryMediaAPI.Video
                 InputDataStream.Dispose();
 
                 if (!UseFilename) OutputDataStream?.Dispose();
-
+                
                 try
                 {
                     if (ffmpegp?.HasExited == false && !ffmpegp.WaitForExit(500))
