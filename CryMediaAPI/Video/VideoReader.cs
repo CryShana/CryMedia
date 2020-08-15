@@ -111,8 +111,10 @@ namespace CryMediaAPI.Video
             if (Metadata.Width == 0 || Metadata.Height == 0) throw new InvalidDataException("Loaded metadata contains errors!");
 
             // we will be reading video in RGB24 format
-            DataStream = FFmpegWrapper.OpenOutput(ffmpeg, $"{(offsetSeconds <= 0 ? "" : $"-ss {offsetSeconds:0.00}")} -i \"{Filename}\"" +
+            DataStream = FFmpegWrapper.OpenOutput(ffmpeg, 
+                $"{(offsetSeconds <= 0 ? "" : $"-ss {offsetSeconds.ToString("0.00", CultureInfo.InvariantCulture)}")} -i \"{Filename}\"" +
                 $" -pix_fmt rgb24 -f rawvideo -");
+
             OpenedForReading = true;
         }
 
