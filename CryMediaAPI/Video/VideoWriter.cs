@@ -11,7 +11,9 @@ namespace CryMediaAPI.Video
         string ffmpeg;
         CancellationTokenSource csc;
         internal Process ffmpegp;
-        
+
+        public Process CurrentFFmpegProcess => ffmpegp;
+
         public int Width { get; }
         public int Height { get; }
         public double Framerate { get; }
@@ -29,7 +31,7 @@ namespace CryMediaAPI.Video
         /// <param name="width">Input width of the video in pixels</param>
         /// <param name="height">Input height of the video in pixels </param>
         /// <param name="framerate">Input framerate of the video in fps</param>
-        /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
+        /// <param name="encoderOptions">Encoding options that will be passed to FFmpeg</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public VideoWriter(string filename, int width, int height, double framerate,
             FFmpegVideoEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
@@ -80,7 +82,7 @@ namespace CryMediaAPI.Video
         /// <summary>
         /// Prepares for writing.
         /// </summary>
-        /// <param name="showFFmpegOutput">Show FFmpeg encoding output for debugging purposes.</param>
+        /// <param name="showFFmpegOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
         public void OpenWrite(bool showFFmpegOutput = false)
         {
             if (OpenedForWriting) throw new InvalidOperationException("File was already opened for writing!");
@@ -236,7 +238,7 @@ namespace CryMediaAPI.Video
         {
             Format = "mp4",
             EncoderName = "libx264",
-            EncoderArguments = "-preset veryfast -crf 23"
+            EncoderArguments = "-preset fast"
         };
 
         /// <summary>

@@ -75,14 +75,7 @@ namespace CryMediaAPI.Video
 
                         metadata.SampleAspectRatio = videoStream.SampleAspectRatio;
                         metadata.AvgFramerateText = videoStream.AvgFrameRate;
-                        metadata.AvgFramerate = 0.0;
-
-                        if (videoStream.AvgFrameRate.Contains('/'))
-                        {
-                            var parsed = videoStream.AvgFrameRate.Split('/');
-                            metadata.AvgFramerate = double.Parse(parsed[0], CultureInfo.InvariantCulture) / double.Parse(parsed[1], CultureInfo.InvariantCulture);
-                        }
-                        else metadata.AvgFramerate = double.Parse(videoStream.AvgFrameRate, CultureInfo.InvariantCulture);
+                        metadata.AvgFramerate = videoStream.AvgFrameRateNumber;
 
                         metadata.PredictedFrameCount = (int)(metadata.AvgFramerate * metadata.Duration);
                     }
