@@ -237,6 +237,47 @@ var (input, output) = VideoWriter.StreamToStream(new FFmpegVideoEncoderOptions
 
 // Or simply save stream to file using 'StreamToFile'
 ```
+### AudioVideoWriter
+Made to write both video and audio data to a single file or stream.
+```csharp
+// Load video
+var vreader = new VideoReader(input);
+vreader.LoadMetadata();
+vreader.Load();
+
+// Load audio
+var areader = new AudioReader(input);
+areader.LoadMetadata();
+areader.Load();
+
+// Get video and audio stream metadata (or just access metadata properties directly instead)
+var vstream = vreader.Metadata.GetFirstVideoStream();
+var astream = areader.Metadata.GetFirstAudioStream();
+
+// Prepare writer (Converting to H.264 + AAC video)
+var writer = new AudioVideoWriter(output,
+    vstream.Width.Value,
+    vstream.Height.Value,
+    vstream.AvgFrameRateNumber,
+    astream.Channels.Value,
+    astream.SampleRateNumber, 16,
+    FFmpegVideoEncoderOptions.H264,
+    FFmpegAudioEncoderOptions.AAC);
+
+// Open for writing (this starts the FFmpeg process)
+writer.OpenWrite();
+
+// Attach a progress tracker to the FFmpeg process
+var progress = FFmpegWrapper.RegisterProgressTracker(writer.CurrentFFmpegProcess, vreader.Metadata.Duration);
+progress.ProgressChanged += (s, p) => Console.WriteLine($"{p:0.00}%");
+
+// Copy raw data directly from stream to stream
+var t1 = vreader.DataStream.CopyToAsync(writer.InputDataStream);
+var t2 = areader.DataStream.CopyToAsync(writer.InputDataStreamAudio);
+
+Task.WaitAll(t1, t2);
+
+```
 
 ## FFmpeg Wrapper
 For specialized needs, you can use the FFmpeg wrapper functions directly using the `FFmpegWrapper` static class.

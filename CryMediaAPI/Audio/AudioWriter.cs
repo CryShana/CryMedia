@@ -12,6 +12,8 @@ namespace CryMediaAPI.Audio
         CancellationTokenSource csc;
         internal Process ffmpegp;
 
+        public Process CurrentFFmpegProcess => ffmpegp;
+
         public int Channels { get; }
         public int SampleRate { get; }
         public int BitDepth { get; }
@@ -79,11 +81,10 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Opens output audio file for writing. This will delete any existing file. Call this before writing samples.
         /// </summary>
-        /// <param name="showFFmpegOutput">Show FFmpeg encoding output for debugging purposes.</param>
+        /// <param name="showFFmpegOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
         public void OpenWrite(bool showFFmpegOutput = false)
         {
             if (OpenedForWriting) throw new InvalidOperationException("File was already opened for writing!");
-            if (File.Exists(Filename)) File.Delete(Filename);
 
             var cmd = $"-f s{BitDepth}le -channels {Channels} -sample_rate {SampleRate} -i - " +
                 $"-c:a {EncoderOptions.EncoderName} {EncoderOptions.EncoderArguments} -f {EncoderOptions.Format}";

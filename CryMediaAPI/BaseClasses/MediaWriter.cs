@@ -21,7 +21,7 @@ namespace CryMediaAPI.BaseClasses
         public virtual bool OpenedForWriting { get; protected set; }
 
         /// <summary>
-        /// Writes frame to output
+        /// Writes frame to output. Make sure to call OpenWrite() before calling this.
         /// </summary>
         /// <param name="frame">Frame containing media data</param>
         public virtual void WriteFrame(Frame frame)

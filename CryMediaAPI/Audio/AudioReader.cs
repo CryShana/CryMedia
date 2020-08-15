@@ -55,13 +55,12 @@ namespace CryMediaAPI.Audio
                     var audioStream = metadata.Streams.Where(x => x.CodecType.ToLower().Trim() == "audio").FirstOrDefault();
                     if (audioStream != null)
                     {
-                        metadata.Channels = audioStream.Channels;
+                        metadata.Channels = audioStream.Channels.Value;
                         metadata.Codec = audioStream.CodecName;
                         metadata.CodecLongName = audioStream.CodecLongName;
                         metadata.SampleFormat = audioStream.SampleFmt;
 
-                        metadata.SampleRate = audioStream.SampleRate == null ? -1 : 
-                            int.Parse(audioStream.SampleRate);
+                        metadata.SampleRate = audioStream.SampleRateNumber;
 
                         metadata.Duration = audioStream.Duration == null ? 
                             double.Parse(metadata.Format.Duration ?? "-1", CultureInfo.InvariantCulture) : 
@@ -70,7 +69,7 @@ namespace CryMediaAPI.Audio
                         metadata.BitRate = audioStream.BitRate == null ? -1 : 
                             int.Parse(audioStream.BitRate);
 
-                        metadata.BitDepth = audioStream.BitsPerSample;
+                        metadata.BitDepth = (int)audioStream.BitsPerSample.Value;
                         metadata.PredictedSampleCount = (int)Math.Round(metadata.Duration * metadata.SampleRate);
 
                         if (metadata.BitDepth == 0)
