@@ -79,19 +79,20 @@ namespace CryMediaAPI
         /// <param name="executable">Executable name or path</param>
         /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
         /// <param name="process">FFmpeg process</param>
-        public static Stream OpenOutput(string executable, string command, out Process process)
+        /// <param name="showOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
+        public static Stream OpenOutput(string executable, string command, out Process process, bool showOutput = false)
         {
             process = Process.Start(new ProcessStartInfo
             {
                 FileName = executable,
                 UseShellExecute = false,
-                RedirectStandardError = true,
+                RedirectStandardError = !showOutput,
                 RedirectStandardOutput = true,
-                CreateNoWindow = true,
+                CreateNoWindow = !showOutput,
                 Arguments = $"-loglevel {LogLevel.ToString().ToLowerInvariant()} {command}"
             });
 
-            process.BeginErrorReadLine();
+            if (!showOutput) process.BeginErrorReadLine();
 
             return process.StandardOutput.BaseStream;
         }
@@ -101,7 +102,8 @@ namespace CryMediaAPI
         /// </summary>
         /// <param name="executable">Executable name or path</param>
         /// <param name="command">Command to run. This string will be passed as an argument to the executable</param>
-        public static Stream OpenOutput(string executable, string command) => OpenOutput(executable, command, out _);
+        /// <param name="showOutput">Show output to terminal. Error stream will not be redirected if this is set to true.</param>
+        public static Stream OpenOutput(string executable, string command, bool showOutput = false) => OpenOutput(executable, command, out _, showOutput);
 
         /// <summary>
         /// Run given command (arguments) using the given executable name or path. This redirects the input stream and returns it.

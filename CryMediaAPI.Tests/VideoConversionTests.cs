@@ -132,7 +132,7 @@ namespace CryMediaAPI.Tests
 
                 Assert.True(video.Metadata.Codec == "h264");
                 Assert.True(video.Metadata.AvgFramerate == reader.Metadata.AvgFramerate);
-                //Assert.True(Math.Abs(video.Metadata.Duration - reader.Metadata.Duration) < 0.01);
+                Assert.True(Math.Abs(video.Metadata.Duration - reader.Metadata.Duration) < 0.2);
                 Assert.True(video.Metadata.Width == reader.Metadata.Width);
                 Assert.True(video.Metadata.Height == reader.Metadata.Height);
                 Assert.True(video.Metadata.BitDepth == reader.Metadata.BitDepth);
