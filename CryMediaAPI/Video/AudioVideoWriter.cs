@@ -200,24 +200,22 @@ namespace CryMediaAPI.Video
             if (!OpenedForWriting) throw new InvalidOperationException("File is not opened for writing!");
 
             try
-            {
-                csc?.Cancel();
-
-                InputDataStreamAudio?.Close();
-                InputDataStreamVideo?.Close();
+            {   
+                InputDataStreamAudio?.Dispose();
+                InputDataStreamVideo?.Dispose();
 
                 connected_socket?.Shutdown(SocketShutdown.Both);
                 connected_socket?.Close();
                 socket?.Close();
 
+                ffmpegp.WaitForExit(500);
+                csc?.Cancel();
+
                 if (!UseFilename) OutputDataStream?.Dispose();
 
                 try
                 {
-                    if (ffmpegp?.HasExited == false && !ffmpegp.WaitForExit(500))
-                    {     
-                        ffmpegp.Kill();
-                    }
+                    if (ffmpegp?.HasExited == false && !ffmpegp.WaitForExit(500)) ffmpegp.Kill();  
                 }
                 catch { }
             }
