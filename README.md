@@ -267,8 +267,7 @@ encoder.SetCQP(31);
 // get EncoderOptions from builder
 var options = encoder.Create();
 
-// using VideoReader + VideoWriter for conversion
-// You can process frame by frame and edit each one of them
+// EXAMPLE: using VideoReader + VideoWriter for conversion 
 using (var reader = new VideoReader(input))
 {
     reader.LoadMetadata();
@@ -281,12 +280,16 @@ using (var reader = new VideoReader(input))
         options))
     {
         writer.OpenWrite();
+        
+        // instead of "CopyTo" can read and write frames separately
         reader.CopyTo(writer);
     }
 }
 ```
 ### AudioVideoWriter
-Made to write both video and audio data to a single file or stream.
+Made to handle both video and audio readers and writing to a single file or stream.
+
+If you only want to convert files, use the static methods on `VideoWriter` (`FileToFile`, `FileToStream`, ...). Use this if you have a Video and Audio reader and want to join them together.
 ```csharp
 // Load video
 var vreader = new VideoReader(input);
@@ -320,6 +323,7 @@ var progress = FFmpegWrapper.RegisterProgressTracker(writer.CurrentFFmpegProcess
 progress.ProgressChanged += (s, p) => Console.WriteLine($"{p:0.00}%");
 
 // Copy raw data directly from stream to stream
+// Or you can read/write frames manually here
 var t1 = vreader.DataStream.CopyToAsync(writer.InputDataStreamVideo);
 var t2 = areader.DataStream.CopyToAsync(writer.InputDataStreamAudio);
 
