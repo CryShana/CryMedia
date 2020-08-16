@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
+
 using CryMediaAPI.Audio;
+using CryMediaAPI.Encoding.Builders;
 using CryMediaAPI.Video;
 
 namespace TestingConsole
@@ -20,7 +21,7 @@ namespace TestingConsole
 
             // ReadPlayAudio(input, output);
             // ReadPlayVideo(input, output);
-            
+
             // SaveVideoFrame(input);
         }
 
@@ -52,8 +53,9 @@ namespace TestingConsole
             video.LoadMetadataAsync().Wait();
             video.Load();
 
-            using (var writer = new VideoWriter(File.Create(output), video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate,
-                new FFmpegVideoEncoderOptions() { Format = "flv" }))
+            using (var writer = new VideoWriter(File.Create(output), 
+                video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate,
+                new H264Encoder() { Format = "flv" }.Create()))
             {
                 writer.OpenWrite(true);
                 //video.CopyTo(writer);
