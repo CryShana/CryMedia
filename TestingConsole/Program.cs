@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
+using CryMediaAPI;
 using CryMediaAPI.Audio;
 using CryMediaAPI.Encoding.Builders;
 using CryMediaAPI.Video;
@@ -15,6 +17,8 @@ namespace TestingConsole
 
             string input = args[0];
             string output = args[1];
+
+            ConvertVideo(input, output);
 
             // ReadWriteAudio(input, output);
             // ReadWriteVideo(input, output);
@@ -53,13 +57,13 @@ namespace TestingConsole
             video.LoadMetadataAsync().Wait();
             video.Load();
 
-            using (var writer = new VideoWriter(File.Create(output), 
+            using (var writer = new VideoWriter(File.Create(output),
                 video.Metadata.Width, video.Metadata.Height, video.Metadata.AvgFramerate,
                 new H264Encoder() { Format = "flv" }.Create()))
             {
                 writer.OpenWrite(true);
                 //video.CopyTo(writer);
-                
+
                 var frame = new VideoFrame(video.Metadata.Width, video.Metadata.Height);
                 while (true)
                 {
@@ -86,7 +90,7 @@ namespace TestingConsole
         {
             var video = new VideoReader(input);
             video.LoadMetadataAsync().Wait();
-            video.Load();     
+            video.Load();
 
             using (var player = new VideoPlayer())
             {
@@ -116,7 +120,7 @@ namespace TestingConsole
                     {
                         player.WriteFrame(frame);
                     }
-                    catch (IOException) { break;  }
+                    catch (IOException) { break; }
                     catch
                     {
                         throw;
@@ -134,10 +138,10 @@ namespace TestingConsole
             using (var player = new AudioPlayer())
             {
                 player.OpenWrite(audio.Metadata.SampleRate, audio.Metadata.Channels, showWindow: false);
-                
+
                 // For simple playing, can just use "CopyTo"
                 // audio.CopyTo(player);
-                
+
                 var frame = new AudioFrame(audio.Metadata.Channels);
                 while (true)
                 {
@@ -166,6 +170,29 @@ namespace TestingConsole
 
             var fr = video.NextFrame();
             fr.Save("test.png");
+        }
+
+        static void ConvertVideo(string input, string output)
+        {
+            var encoder = new VP9Encoder();
+            encoder.RowBasedMultithreading = true;
+            encoder.SetCQP(31);
+
+            using (var reader = new VideoReader(input))
+            {
+                reader.LoadMetadata();
+                reader.Load();
+
+                using (var writer = new VideoWriter(output,
+                    reader.Metadata.Width,
+                    reader.Metadata.Height,
+                    reader.Metadata.AvgFramerate,
+                    encoder.Create()))
+                {
+                    writer.OpenWrite(true);
+                    reader.CopyTo(writer);
+                }
+            }
         }
     }
 }

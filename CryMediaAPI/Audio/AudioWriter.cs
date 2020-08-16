@@ -119,14 +119,14 @@ namespace CryMediaAPI.Audio
             try
             {
                 InputDataStream.Dispose();
-                ffmpegp.WaitForExit(500);
+                ffmpegp.WaitForExit();
                 csc?.Cancel();
 
                 if (!UseFilename) OutputDataStream?.Dispose();
 
                 try
                 {
-                    if (ffmpegp?.HasExited == false && !ffmpegp.WaitForExit(500)) ffmpegp.Kill();
+                    if (ffmpegp?.HasExited == false) ffmpegp.Kill();
                 }
                 catch { }
             }
