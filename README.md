@@ -25,7 +25,7 @@ For even older versions, you might have to replace the JSON serializer and adjus
 var video = new VideoReader("test.mp4");
 
 // load metadata
-await video.LoadMetadata();
+await video.LoadMetadataAsync();
 
 // example metadata that you can get
 var width = video.Metadata.Width;
@@ -81,8 +81,8 @@ using (var writer = new VideoWriter("out.mp4", width, height, fps)
 You can customize the encoding options that will be passed to FFmpeg.
 
 ```csharp
-// this is the default encoder
-var options = new FFmpegVideoEncoderOptions()
+// EncoderOptions class
+var options = new EncoderOptions()
 {
     Format = "mp4",
     EncoderName = "libx264",
@@ -90,6 +90,17 @@ var options = new FFmpegVideoEncoderOptions()
 };
 
 // pass options to VideoWriter
+var writer = new VideoWriter("out.mp4", w, h, fps, options);
+```
+Or use the existing EncoderOptions builders! Or implement your own!
+```csharp
+var encoder = new H264Encoder();
+encoder.EncoderPreset = H264Encoder.Preset.Medium;
+encoder.EncoderTune = H264Encoder.Tune.Film;
+encoder.EncoderProfile = H264Encoder.Profile.High;
+encoder.SetCQP(22);
+
+var options = encoder.Create();
 var writer = new VideoWriter("out.mp4", w, h, fps, options);
 ```
 ### Playing video files
@@ -130,7 +141,7 @@ fr.Save("frame.webp", "libwebp");
 var audio = new AudioReader("test.mp3");
 
 // load metadata
-await audio.LoadMetadata();
+await audio.LoadMetadataAsync();
 
 // example metadata that you can get
 var channels = audio.Metadata.Channels;
@@ -181,7 +192,7 @@ using (var writer = new AudioWriter("out.mp3", channels, sample_rate, 16)
 
 ```csharp
 // this is the default encoder
-var options = new FFmpegAudioEncoderOptions()
+var options = new EncoderOptions()
 {
     Format = "mp3",
     EncoderName = "libmp3lame",
@@ -190,6 +201,16 @@ var options = new FFmpegAudioEncoderOptions()
 
 // pass options to AudioWriter
 var writer = new AudioWriter("out.mp3", channels, sample_rate, 16, options);
+```
+Or use the existing EncoderOptions builders! Or implement your own!
+```csharp
+var encoder = new OpusEncoder();
+encoder.CodecApplication = OpusEncoder.Application.Audio;
+encoder.CompressionLevel = 10;
+encoder.SetVBR("128k");
+
+var options = encoder.Create();
+var writer = new AudioWriter("out.ogg", channels, sample_rate, 16, options);
 ```
 
 ### Playing audio files
