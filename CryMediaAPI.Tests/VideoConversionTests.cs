@@ -58,7 +58,7 @@ namespace CryMediaAPI.Tests
         }
 
         [Fact]
-        public async Task ConversionTest()
+        public async Task ConversionTest1()
         {
             var path = Res.GetPath(Res.Video_Mp4);
             var opath = "out-test-v-1.mp4";
@@ -137,6 +137,50 @@ namespace CryMediaAPI.Tests
                 Assert.True(video.Metadata.Width == reader.Metadata.Width);
                 Assert.True(video.Metadata.Height == reader.Metadata.Height);
                 Assert.True(video.Metadata.BitDepth == reader.Metadata.BitDepth);
+                Assert.True(video.Metadata.Streams.Length == 1);  // only video
+            }
+            finally
+            {
+                if (File.Exists(opath)) File.Delete(opath);
+            }
+        }
+
+        [Fact]
+        public async Task ConversionTest2()
+        {
+            var path = Res.GetPath(Res.Video_Mp4);
+            var opath = "out-test-v-2.webm";
+
+            try
+            {
+                var encoder = new VP9Encoder();
+                encoder.RowBasedMultithreading = true;
+                encoder.SetCQP(31);
+
+                using var reader = new VideoReader(path);
+
+                reader.LoadMetadata();
+                reader.Load();
+
+                using (var writer = new VideoWriter(opath,
+                    reader.Metadata.Width,
+                    reader.Metadata.Height,
+                    reader.Metadata.AvgFramerate,
+                    encoder.Create()))
+                {
+                    writer.OpenWrite(true);
+                    reader.CopyTo(writer);
+                }
+
+
+                using var video = new VideoReader(opath);
+                await video.LoadMetadataAsync();
+
+                Assert.True(video.Metadata.Codec == "vp9");
+                Assert.True(video.Metadata.AvgFramerate == reader.Metadata.AvgFramerate);
+                Assert.True(Math.Abs(video.Metadata.Duration - reader.Metadata.Duration) < 0.01);
+                Assert.True(video.Metadata.Width == reader.Metadata.Width);
+                Assert.True(video.Metadata.Height == reader.Metadata.Height);
                 Assert.True(video.Metadata.Streams.Length == 1);  // only video
             }
             finally
