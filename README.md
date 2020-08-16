@@ -210,9 +210,10 @@ player.WriteFrame(sample);
 player.Dispose();
 ```
 ### Conversions
+You can manually set the EncoderOptions object and use the VideoWriter static methods for conversions:
 ```csharp
 // This will convert the "from.mp4" video to "to.flv" video
-VideoWriter.FileToFile("from.mp4", "to.flv", new FFmpegVideoEncoderOptions
+VideoWriter.FileToFile("from.mp4", "to.flv", new EncoderOptions
 {
     Format = "flv",
     EncoderName = "h264_nvenc",
@@ -220,7 +221,7 @@ VideoWriter.FileToFile("from.mp4", "to.flv", new FFmpegVideoEncoderOptions
 }, out _);
 
 // This will convert the "from.mp4" directly into a stream (example: for streaming video)
-var stream = VideoWriter.FileToStream("from.mp4", new FFmpegVideoEncoderOptions
+var stream = VideoWriter.FileToStream("from.mp4", new EncoderOptions
 {
     Format = "flv",
     EncoderName = "h264_nvenc",
@@ -228,14 +229,40 @@ var stream = VideoWriter.FileToStream("from.mp4", new FFmpegVideoEncoderOptions
 }, out _);
 
 // You can convert from one stream to another stream
-var (input, output) = VideoWriter.StreamToStream(new FFmpegVideoEncoderOptions
+var (input, output) = VideoWriter.StreamToStream(new EncoderOptions
 {
     Format = "flv",
     EncoderName = "h264_nvenc",
     EncoderArguments = "-preset slow"
 }, out _, "-f mp4");  // <-- you can further describe the input stream if required
+```
+Or you can use EncoderOption builders. For example VP9:
+```csharp
+// Converting video to VP9 manually (using constant quality mode and row multithreading)
+var encoder = new VP9Encoder();
+encoder.RowBasedMultithreading = true;
+encoder.SetCQP(31);
 
-// Or simply save stream to file using 'StreamToFile'
+// get EncoderOptions from builder
+var options = encoder.Create();
+
+// using VideoReader + VideoWriter for conversion
+// You can process frame by frame and edit each one of them
+using (var reader = new VideoReader(input))
+{
+    reader.LoadMetadata();
+    reader.Load();
+
+    using (var writer = new VideoWriter(output,
+        reader.Metadata.Width,
+        reader.Metadata.Height,
+        reader.Metadata.AvgFramerate,
+        options))
+    {
+        writer.OpenWrite();
+        reader.CopyTo(writer);
+    }
+}
 ```
 ### AudioVideoWriter
 Made to write both video and audio data to a single file or stream.
@@ -261,8 +288,8 @@ var writer = new AudioVideoWriter(output,
     vstream.AvgFrameRateNumber,
     astream.Channels.Value,
     astream.SampleRateNumber, 16,
-    FFmpegVideoEncoderOptions.H264,
-    FFmpegAudioEncoderOptions.AAC);
+    new H264Encoder().Create(),
+    new AACEncoder().Create());
 
 // Open for writing (this starts the FFmpeg process)
 writer.OpenWrite();
@@ -276,7 +303,6 @@ var t1 = vreader.DataStream.CopyToAsync(writer.InputDataStreamVideo);
 var t2 = areader.DataStream.CopyToAsync(writer.InputDataStreamAudio);
 
 Task.WaitAll(t1, t2);
-
 ```
 
 ## FFmpeg Wrapper
