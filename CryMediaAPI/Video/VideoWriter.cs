@@ -4,6 +4,7 @@ using System.Threading;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
 using CryMediaAPI.Encoding;
+using CryMediaAPI.Encoding.Builders;
 
 namespace CryMediaAPI.Video
 {
@@ -50,7 +51,7 @@ namespace CryMediaAPI.Video
             Height = height;
             Framerate = framerate;
             DestinationStream = null;
-            EncoderOptions = encoderOptions ?? new EncoderOptions();
+            EncoderOptions = encoderOptions ?? new H264Encoder().Create();
         }
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace CryMediaAPI.Video
             Height = height;
             Framerate = framerate;
             DestinationStream = destinationStream;
-            EncoderOptions = encoderOptions ?? new EncoderOptions();
+            EncoderOptions = encoderOptions ?? new H264Encoder().Create();
         }
 
         /// <summary>

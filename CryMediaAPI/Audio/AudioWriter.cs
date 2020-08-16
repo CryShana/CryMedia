@@ -4,6 +4,7 @@ using System.Threading;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
 using CryMediaAPI.Encoding;
+using CryMediaAPI.Encoding.Builders;
 
 namespace CryMediaAPI.Audio
 {
@@ -49,7 +50,7 @@ namespace CryMediaAPI.Audio
             SampleRate = sampleRate;
 
             Filename = filename;
-            EncoderOptions = encoderOptions ?? new EncoderOptions();
+            EncoderOptions = encoderOptions ?? new MP3Encoder().Create();
         }
 
         /// <summary>
@@ -76,7 +77,7 @@ namespace CryMediaAPI.Audio
             SampleRate = sampleRate;
 
             DestinationStream = destinationStream;
-            EncoderOptions = encoderOptions ?? new EncoderOptions();
+            EncoderOptions = encoderOptions ?? new MP3Encoder().Create();
         }
 
         /// <summary>
