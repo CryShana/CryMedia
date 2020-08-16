@@ -48,15 +48,16 @@ namespace CryMediaAPI.Encoding.Builders
         }
 
         /// <summary>
-        /// Constrained encoding - Set maximum bitrate (Good for streaming where certain frames need less bitrate)
+        /// Constrained quality encoding with a verifier - Set maximum bitrate (Good for streaming where certain frames need less bitrate)
         /// CRF is increased when [max_bitrate] is exceeded.
         /// </summary>
         /// <param name="crf">Float number from 0 to 51 (0=lossless)</param>
         /// <param name="max_bitrate">Max. allowed bitrate (ex: '1M', '1000k', ...)</param>
-        /// <param name="bufsize">Decoder buffer size, which determines the variability of the output bitrate. This is expected client buffer size. (ex: '1M', '1000k', ...)</param>
-        public void SetVBV(float crf, string max_bitrate, string bufsize)
+        /// <param name="bufsize">Decoder buffer size, which determines the variability of the output bitrate. This is expected client buffer size. (ex: '1M', '1000k', ... Should be more than the bitrate)</param>
+        /// <param name="crf_max">Prevents lowering CRF beyond this point (-1 = auto)</param>
+        public void SetVBV(float crf, string max_bitrate, string bufsize, float crf_max = -1)
         {
-            CurrentQualitySettings = $"-crf {crf.ToString("0.00", CultureInfo.InvariantCulture)} -maxrate {max_bitrate} -bufsize {bufsize}";
+            CurrentQualitySettings = $"-crf {crf.ToString("0.00", CultureInfo.InvariantCulture)} -maxrate {max_bitrate} -bufsize {bufsize} -crf_max {crf_max}";
         }
 
         /// <summary>
