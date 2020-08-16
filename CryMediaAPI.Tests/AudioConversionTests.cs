@@ -90,5 +90,48 @@ namespace CryMediaAPI.Tests
                 if (File.Exists(opath)) File.Delete(opath);
             }
         }
+
+        [Fact]
+        public async Task ConversionStreamTest()
+        {
+            var path = Res.GetPath(Res.Audio_Mp3);
+            var opath = "out-test-v-2.aac";
+
+            try
+            {
+                using var reader = new AudioReader(path);
+                await reader.LoadMetadataAsync();
+
+                var encoder = FFmpegAudioEncoderOptions.AAC;
+                encoder.Format = "flv";
+
+                using (var filestream = File.Create(opath))
+                {
+                    using (var writer = new AudioWriter(filestream,
+                       reader.Metadata.Channels,
+                       reader.Metadata.SampleRate, 16,
+                       encoder))
+                    {
+                        writer.OpenWrite();
+
+                        reader.Load();
+
+                        await reader.CopyToAsync(writer);
+                    }                 
+                }
+
+                using var audio = new AudioReader(opath);
+                await audio.LoadMetadataAsync();
+
+                Assert.True(audio.Metadata.Format.FormatName == "flv");
+                Assert.True(audio.Metadata.Channels == 2);
+                Assert.True(audio.Metadata.Streams.Length == 1);
+                Assert.True(Math.Abs(audio.Metadata.Duration - 1.515102) < 0.2);
+            }
+            finally
+            {
+                if (File.Exists(opath)) File.Delete(opath);
+            }
+        }
     }
 }
