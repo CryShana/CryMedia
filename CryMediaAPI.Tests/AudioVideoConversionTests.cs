@@ -134,6 +134,7 @@ namespace CryMediaAPI.Tests
                 astream = video.Metadata.GetFirstAudioStream();
 
                 Assert.True(Math.Abs(vstream.AvgFrameRateNumber - vreader.Metadata.AvgFramerate) < 0.1);
+                Assert.True(Math.Abs(video.Metadata.Duration - vreader.Metadata.Duration) < 0.2);
                 Assert.True(vstream.Width.Value == vreader.Metadata.Width);
                 Assert.True(vstream.Height.Value == vreader.Metadata.Height);
                 Assert.True(astream.SampleRateNumber == areader.Metadata.SampleRate);
