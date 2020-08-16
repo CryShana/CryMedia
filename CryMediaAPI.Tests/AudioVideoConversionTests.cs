@@ -1,4 +1,5 @@
 ﻿using CryMediaAPI.Audio;
+using CryMediaAPI.Encoding.Builders;
 using CryMediaAPI.Resources;
 using CryMediaAPI.Video;
 
@@ -40,8 +41,8 @@ namespace CryMediaAPI.Tests
                     vstream.AvgFrameRateNumber,
                     astream.Channels.Value,
                     astream.SampleRateNumber, 16,
-                    FFmpegVideoEncoderOptions.H264,
-                    FFmpegAudioEncoderOptions.AAC))
+                    new H264Encoder().Create(),
+                    new AACEncoder().Create()))
                 {
 
                     // Open for writing (this starts the FFmpeg process)
@@ -98,7 +99,7 @@ namespace CryMediaAPI.Tests
                 var vstream = vreader.Metadata.GetFirstVideoStream();
                 var astream = areader.Metadata.GetFirstAudioStream();
 
-                var encoder = FFmpegVideoEncoderOptions.H264;
+                var encoder = new H264Encoder();
                 encoder.Format = "flv";
 
                 using (var filestream = File.Create(opath))
@@ -110,7 +111,8 @@ namespace CryMediaAPI.Tests
                         vstream.AvgFrameRateNumber,
                         astream.Channels.Value,
                         astream.SampleRateNumber, 16,
-                        encoder, FFmpegAudioEncoderOptions.AAC))
+                        encoder.Create(), 
+                        new AACEncoder().Create()))
                     {
 
                         // Open for writing (this starts the FFmpeg process)

@@ -1,4 +1,6 @@
 ﻿using CryMediaAPI.Audio;
+using CryMediaAPI.Encoding;
+using CryMediaAPI.Encoding.Builders;
 using CryMediaAPI.Resources;
 
 using System;
@@ -68,7 +70,7 @@ namespace CryMediaAPI.Tests
                 using (var writer = new AudioWriter(opath, 
                     reader.Metadata.Channels, 
                     reader.Metadata.SampleRate, 16,
-                    FFmpegAudioEncoderOptions.MP3))
+                    new MP3Encoder().Create()))
                 {
                     writer.OpenWrite();
 
@@ -102,7 +104,7 @@ namespace CryMediaAPI.Tests
                 using var reader = new AudioReader(path);
                 await reader.LoadMetadataAsync();
 
-                var encoder = FFmpegAudioEncoderOptions.AAC;
+                var encoder = new AACEncoder();
                 encoder.Format = "flv";
 
                 using (var filestream = File.Create(opath))
@@ -110,7 +112,7 @@ namespace CryMediaAPI.Tests
                     using (var writer = new AudioWriter(filestream,
                        reader.Metadata.Channels,
                        reader.Metadata.SampleRate, 16,
-                       encoder))
+                       encoder.Create()))
                     {
                         writer.OpenWrite();
 

@@ -1,4 +1,5 @@
-﻿using CryMediaAPI.Resources;
+﻿using CryMediaAPI.Encoding.Builders;
+using CryMediaAPI.Resources;
 using CryMediaAPI.Video;
 
 using System;
@@ -71,7 +72,7 @@ namespace CryMediaAPI.Tests
                     reader.Metadata.Width,
                     reader.Metadata.Height,
                     reader.Metadata.AvgFramerate,
-                    FFmpegVideoEncoderOptions.H264))
+                    new H264Encoder().Create()))
                 {
                     writer.OpenWrite();
 
@@ -108,7 +109,7 @@ namespace CryMediaAPI.Tests
                 using var reader = new VideoReader(path);
                 await reader.LoadMetadataAsync();
 
-                var encoder = FFmpegVideoEncoderOptions.H264;
+                var encoder = new H264Encoder();
                 encoder.Format = "flv";
 
                 using (var filestream = File.Create(opath))
@@ -117,7 +118,7 @@ namespace CryMediaAPI.Tests
                         reader.Metadata.Width,
                         reader.Metadata.Height,
                         reader.Metadata.AvgFramerate,
-                        encoder))
+                        encoder.Create()))
                     {
                         writer.OpenWrite();
 

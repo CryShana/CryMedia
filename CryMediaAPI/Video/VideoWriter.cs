@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
+using CryMediaAPI.Encoding;
 
 namespace CryMediaAPI.Video
 {
@@ -18,7 +19,7 @@ namespace CryMediaAPI.Video
         public int Height { get; }
         public double Framerate { get; }
         public bool UseFilename { get; }
-        public FFmpegVideoEncoderOptions EncoderOptions { get; }
+        public EncoderOptions EncoderOptions { get; }
 
         public Stream DestinationStream { get; private set; }
         public Stream OutputDataStream { get; private set; }
@@ -34,7 +35,7 @@ namespace CryMediaAPI.Video
         /// <param name="encoderOptions">Encoding options that will be passed to FFmpeg</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public VideoWriter(string filename, int width, int height, double framerate,
-            FFmpegVideoEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
+            EncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
         {
             if (width <= 0 || height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
             if (framerate <= 0) throw new InvalidDataException("Video framerate has to be bigger than 0!");
@@ -49,7 +50,7 @@ namespace CryMediaAPI.Video
             Height = height;
             Framerate = framerate;
             DestinationStream = null;
-            EncoderOptions = encoderOptions ?? new FFmpegVideoEncoderOptions();
+            EncoderOptions = encoderOptions ?? new EncoderOptions();
         }
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace CryMediaAPI.Video
         /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public VideoWriter(Stream destinationStream, int width, int height, double framerate,
-            FFmpegVideoEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
+            EncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
         {
             if (width <= 0 || height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
             if (framerate <= 0) throw new InvalidDataException("Video framerate has to be bigger than 0!");
@@ -76,7 +77,7 @@ namespace CryMediaAPI.Video
             Height = height;
             Framerate = framerate;
             DestinationStream = destinationStream;
-            EncoderOptions = encoderOptions ?? new FFmpegVideoEncoderOptions();
+            EncoderOptions = encoderOptions ?? new EncoderOptions();
         }
 
         /// <summary>
@@ -149,7 +150,7 @@ namespace CryMediaAPI.Video
         /// <param name="process">FFmpeg process</param>
         /// <param name="inputArguments">Input arguments (such as -f, -v:c, -video_size,...)</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public static void FileToFile(string inputFilename, string outputFilename, FFmpegVideoEncoderOptions options, out Process process,
+        public static void FileToFile(string inputFilename, string outputFilename, EncoderOptions options, out Process process,
             string inputArguments = "", bool showOutput = false, string ffmpegExecutable = "ffmpeg")
         {
             var output = FFmpegWrapper.ExecuteCommand(ffmpegExecutable, $"{inputArguments} -i \"{inputFilename}\" " +
@@ -166,7 +167,7 @@ namespace CryMediaAPI.Video
         /// <param name="process">FFmpeg process</param>
         /// <param name="inputArguments">Input arguments (such as -f, -v:c, -video_size,...)</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public static Stream StreamToFile(string outputFilename, FFmpegVideoEncoderOptions options, out Process process,
+        public static Stream StreamToFile(string outputFilename, EncoderOptions options, out Process process,
             string inputArguments = "", bool showOutput = false, string ffmpegExecutable = "ffmpeg")
         {
             var input = FFmpegWrapper.OpenInput(ffmpegExecutable, $"{inputArguments} -i - " +
@@ -183,7 +184,7 @@ namespace CryMediaAPI.Video
         /// <param name="process">FFmpeg process</param>
         /// <param name="inputArguments">Input arguments (such as -f, -v:c, -video_size,...)</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public static Stream FileToStream(string inputFilename, FFmpegVideoEncoderOptions options, out Process process, 
+        public static Stream FileToStream(string inputFilename, EncoderOptions options, out Process process, 
             string inputArguments = "", string ffmpegExecutable = "ffmpeg")
         {
             var output = FFmpegWrapper.OpenOutput(ffmpegExecutable, $"{inputArguments} -i \"{inputFilename}\" " +
@@ -199,7 +200,7 @@ namespace CryMediaAPI.Video
         /// <param name="process">FFmpeg process</param>
         /// <param name="inputArguments">Input arguments (such as -f, -v:c, -video_size,...)</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public static (Stream Input, Stream Output) StreamToStream(FFmpegVideoEncoderOptions options, out Process process, 
+        public static (Stream Input, Stream Output) StreamToStream(EncoderOptions options, out Process process, 
             string inputArguments = "", string ffmpegExecutable = "ffmpeg")
         {
             var (input, output) = FFmpegWrapper.Open(ffmpegExecutable, $"{inputArguments} -i - " +
@@ -207,78 +208,5 @@ namespace CryMediaAPI.Video
 
             return (input, output);
         }
-    }
-
-    /// <summary>
-    /// FFmpeg video encoding options to pass to FFmpeg when encoding. Check the online FFmpeg documentation for more info.
-    /// </summary>
-    public class FFmpegVideoEncoderOptions
-    {
-        /// <summary>
-        /// Container format. (example: 'mp4', 'flv', 'webm')
-        /// </summary>
-        public string Format { get; set; } = "mp4";
-
-        /// <summary>
-        /// Encoder name. (example: 'libx264', 'libx265', 'libvpx')
-        /// </summary>
-        public string EncoderName { get; set; } = "libx264";
-
-        /// <summary>
-        /// Arguments for the encoder. This depends on the used encoder.
-        /// </summary>
-        public string EncoderArguments { get; set; } = "-preset veryfast -crf 23";
-
-        // PRESETS
-
-        /// <summary>
-        /// H.264 encoder preset
-        /// </summary>
-        public static FFmpegVideoEncoderOptions H264 => new FFmpegVideoEncoderOptions()
-        {
-            Format = "mp4",
-            EncoderName = "libx264",
-            EncoderArguments = "-preset fast"
-        };
-
-        /// <summary>
-        /// H.265 encoder preset
-        /// </summary>
-        public static FFmpegVideoEncoderOptions H265 => new FFmpegVideoEncoderOptions()
-        {
-            Format = "mp4",
-            EncoderName = "libx265",
-            EncoderArguments = "-preset veryfast -crf 23"
-        };
-
-        /// <summary>
-        /// VP8 encoder preset
-        /// </summary>
-        public static FFmpegVideoEncoderOptions VP8 => new FFmpegVideoEncoderOptions()
-        {
-            Format = "webm",
-            EncoderName = "libvpx",
-            EncoderArguments = "-crf 30"
-        };
-
-        /// <summary>
-        /// VP9 encoder preset
-        /// </summary>
-        public static FFmpegVideoEncoderOptions VP9 => new FFmpegVideoEncoderOptions()
-        {
-            Format = "webm",
-            EncoderName = "libvpx-vp9",
-            EncoderArguments = "-crf 30"
-        };
-
-        /// <summary>
-        /// H.264 NVENC encoder preset
-        /// </summary>
-        public static FFmpegVideoEncoderOptions H264_Nvenc => new FFmpegVideoEncoderOptions()
-        {
-            Format = "mp4",
-            EncoderName = "h264_nvenc",
-            EncoderArguments = "-preset fast -rc:v vbr_hq -cq:v 19"
-        };
     }
 }

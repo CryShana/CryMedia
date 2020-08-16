@@ -7,6 +7,7 @@ using System.Diagnostics;
 
 using CryMediaAPI.Audio;
 using CryMediaAPI.BaseClasses;
+using CryMediaAPI.Encoding;
 
 namespace CryMediaAPI.Video
 {
@@ -57,8 +58,8 @@ namespace CryMediaAPI.Video
         /// </summary>
         public virtual bool OpenedForWriting { get; protected set; }
 
-        public FFmpegAudioEncoderOptions AudioEncoderOptions { get; }
-        public FFmpegVideoEncoderOptions VideoEncoderOptions { get; }
+        public EncoderOptions AudioEncoderOptions { get; }
+        public EncoderOptions VideoEncoderOptions { get; }
 
         /// <summary>
         /// Used for encoding video and audio frames into a single file
@@ -75,8 +76,8 @@ namespace CryMediaAPI.Video
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public AudioVideoWriter(string filename, int video_width, int video_height, double video_framerate,
             int audio_channels, int audio_sampleRate, int audio_bitDepth, 
-            FFmpegVideoEncoderOptions videoEncoderOptions, 
-            FFmpegAudioEncoderOptions audioEncoderOptions, 
+            EncoderOptions videoEncoderOptions, 
+            EncoderOptions audioEncoderOptions, 
             string ffmpegExecutable = "ffmpeg")
         {
             if (video_width <= 0 || video_height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
@@ -116,8 +117,8 @@ namespace CryMediaAPI.Video
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public AudioVideoWriter(Stream outputStream, int video_width, int video_height, double video_framerate,
             int audio_channels, int audio_sampleRate, int audio_bitDepth,
-            FFmpegVideoEncoderOptions videoEncoderOptions,
-            FFmpegAudioEncoderOptions audioEncoderOptions,
+            EncoderOptions videoEncoderOptions,
+            EncoderOptions audioEncoderOptions,
             string ffmpegExecutable = "ffmpeg")
         {
             if (video_width <= 0 || video_height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");

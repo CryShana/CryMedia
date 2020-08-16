@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
+using CryMediaAPI.Encoding;
 
 namespace CryMediaAPI.Audio
 {
@@ -18,7 +19,7 @@ namespace CryMediaAPI.Audio
         public int SampleRate { get; }
         public int BitDepth { get; }
         public bool UseFilename { get; }
-        public FFmpegAudioEncoderOptions EncoderOptions { get; }
+        public EncoderOptions EncoderOptions { get; }
 
         public Stream DestinationStream { get; private set; }
         public Stream OutputDataStream { get; private set; }
@@ -34,7 +35,7 @@ namespace CryMediaAPI.Audio
         /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public AudioWriter(string filename, int channels, int sampleRate, int bitDepth = 16,
-            FFmpegAudioEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
+            EncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
         {
             if (channels <= 0 || sampleRate <= 0) throw new InvalidDataException("Channels/Sample rate have to be bigger than 0!");
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
@@ -48,7 +49,7 @@ namespace CryMediaAPI.Audio
             SampleRate = sampleRate;
 
             Filename = filename;
-            EncoderOptions = encoderOptions ?? new FFmpegAudioEncoderOptions();
+            EncoderOptions = encoderOptions ?? new EncoderOptions();
         }
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace CryMediaAPI.Audio
         /// <param name="encoderOptions">Extra FFmpeg encoding options that will be passed to FFmpeg</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public AudioWriter(Stream destinationStream, int channels, int sampleRate, int bitDepth = 16,
-            FFmpegAudioEncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
+            EncoderOptions encoderOptions = null, string ffmpegExecutable = "ffmpeg")
         {
             if (channels <= 0 || sampleRate <= 0) throw new InvalidDataException("Channels/Sample rate have to be bigger than 0!");
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
@@ -75,7 +76,7 @@ namespace CryMediaAPI.Audio
             SampleRate = sampleRate;
 
             DestinationStream = destinationStream;
-            EncoderOptions = encoderOptions ?? new FFmpegAudioEncoderOptions();
+            EncoderOptions = encoderOptions ?? new EncoderOptions();
         }
 
         /// <summary>
@@ -148,7 +149,7 @@ namespace CryMediaAPI.Audio
         /// <param name="process">FFmpeg process</param>
         /// <param name="inputArguments">Input arguments (such as-f, -channels, -sample_rate,...)</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public static void FileToFile(string inputFilename, string outputFilename, FFmpegAudioEncoderOptions options, out Process process,
+        public static void FileToFile(string inputFilename, string outputFilename, EncoderOptions options, out Process process,
             string inputArguments = "", bool showOutput = false, string ffmpegExecutable = "ffmpeg")
         {
             var output = FFmpegWrapper.ExecuteCommand(ffmpegExecutable, $"{inputArguments} -i \"{inputFilename}\" " +
@@ -165,7 +166,7 @@ namespace CryMediaAPI.Audio
         /// <param name="process">FFmpeg process</param>
         /// <param name="inputArguments">Input arguments (such as -f, -channels, -sample_rate,...)</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public static Stream StreamToFile(string outputFilename, FFmpegAudioEncoderOptions options, out Process process,
+        public static Stream StreamToFile(string outputFilename, EncoderOptions options, out Process process,
             string inputArguments = "", bool showOutput = false, string ffmpegExecutable = "ffmpeg")
         {
             var input = FFmpegWrapper.OpenInput(ffmpegExecutable, $"{inputArguments} -i - " +
@@ -182,7 +183,7 @@ namespace CryMediaAPI.Audio
         /// <param name="process">FFmpeg process</param>
         /// <param name="inputArguments">Input arguments (such as -f, -channels, -sample_rate,...)</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public static Stream FileToStream(string inputFilename, FFmpegAudioEncoderOptions options, out Process process,
+        public static Stream FileToStream(string inputFilename, EncoderOptions options, out Process process,
             string inputArguments = "", string ffmpegExecutable = "ffmpeg")
         {
             var output = FFmpegWrapper.OpenOutput(ffmpegExecutable, $"{inputArguments} -i \"{inputFilename}\" " +
@@ -198,7 +199,7 @@ namespace CryMediaAPI.Audio
         /// <param name="process">FFmpeg process</param>
         /// <param name="inputArguments">Input arguments (such as -f, -channels, -sample_rate,...)</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
-        public static (Stream Input, Stream Output) StreamToStream(FFmpegAudioEncoderOptions options, out Process process,
+        public static (Stream Input, Stream Output) StreamToStream(EncoderOptions options, out Process process,
             string inputArguments = "", string ffmpegExecutable = "ffmpeg")
         {
             var (input, output) = FFmpegWrapper.Open(ffmpegExecutable, $"{inputArguments} -i - " +
@@ -206,78 +207,5 @@ namespace CryMediaAPI.Audio
 
             return (input, output);
         }
-    }
-
-    /// <summary>
-    /// FFmpeg audio encoding options to pass to FFmpeg when encoding. Check the online FFmpeg documentation for more info.
-    /// </summary>
-    public class FFmpegAudioEncoderOptions
-    {
-        /// <summary>
-        /// Container format. (example: 'mp3', 'wav', 'flac')
-        /// </summary>
-        public string Format { get; set; } = "mp3";
-
-        /// <summary>
-        /// Encoder name. (example: 'libmp3lame', 'wavpack', 'flac')
-        /// </summary>
-        public string EncoderName { get; set; } = "libmp3lame";
-
-        /// <summary>
-        /// Arguments for the encoder. This depends on the used encoder.
-        /// </summary>
-        public string EncoderArguments { get; set; } = "-ar 44100 -b:a 192k";
-
-        // PRESETS
-
-        /// <summary>
-        /// MP3 encoder preset
-        /// </summary>
-        public static FFmpegAudioEncoderOptions MP3 => new FFmpegAudioEncoderOptions()
-        {
-            Format = "mp3",
-            EncoderName = "libmp3lame",
-            EncoderArguments = "-ar 44100 -b:a 192k"
-        };
-
-        /// <summary>
-        /// OGG encoder preset
-        /// </summary>
-        public static FFmpegAudioEncoderOptions OGG => new FFmpegAudioEncoderOptions()
-        {
-            Format = "ogg",
-            EncoderName = "libvorbis",
-            EncoderArguments = "-b:a 8k"
-        };
-
-        /// <summary>
-        /// WAV encoder preset
-        /// </summary>
-        public static FFmpegAudioEncoderOptions WAV => new FFmpegAudioEncoderOptions()
-        {
-            Format = "wav",
-            EncoderName = "pcm_s16le",
-            EncoderArguments = "-ar 44100"
-        };
-
-        /// <summary>
-        /// FLAC encoder preset
-        /// </summary>
-        public static FFmpegAudioEncoderOptions FLAC => new FFmpegAudioEncoderOptions()
-        {
-            Format = "flac",
-            EncoderName = "flac",
-            EncoderArguments = ""
-        };
-
-        /// <summary>
-        /// AAC encoder preset
-        /// </summary>
-        public static FFmpegAudioEncoderOptions AAC => new FFmpegAudioEncoderOptions()
-        {
-            Format = "aac",
-            EncoderName = "aac",
-            EncoderArguments = "-b:a 128k"
-        };
     }
 }
