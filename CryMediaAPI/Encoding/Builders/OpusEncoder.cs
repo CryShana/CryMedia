@@ -3,6 +3,15 @@
     public class OpusEncoder : EncoderOptionsBuilder
     {
         /// <summary>
+        /// Set channel count, leave 'null' to match source
+        /// </summary>
+        public int? ChannelCount { get; set; } = null;
+        /// <summary>
+        /// Set sample rate, leave 'null' to match source
+        /// </summary>
+        public int? SampleRate { get; set; } = null;
+
+        /// <summary>
         /// Set intended application type. (Default: audio)
         /// </summary>
         public Application CodecApplication { get; set; } = Application.Audio;
@@ -55,8 +64,10 @@
                 EncoderName = Name,
                 EncoderArguments = $"{CurrentQualitySettings} " +
                     $"-application {CodecApplication.ToString().ToLowerInvariant()} " +
-                    $"-compression_level {CompressionLevel} "
-        };
+                    $"-compression_level {CompressionLevel}" +
+                    (ChannelCount == null ? "" : $" -ac {ChannelCount}") +
+                    (SampleRate == null ? "" : $" -ar {SampleRate}")
+            };
         }
 
         public enum Application

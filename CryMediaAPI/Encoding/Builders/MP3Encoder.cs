@@ -6,6 +6,15 @@ namespace CryMediaAPI.Encoding.Builders
 {
     public class MP3Encoder : EncoderOptionsBuilder
     {
+        /// <summary>
+        /// Set channel count, leave 'null' to match source
+        /// </summary>
+        public int? ChannelCount { get; set; } = null;
+        /// <summary>
+        /// Set sample rate, leave 'null' to match source
+        /// </summary>
+        public int? SampleRate { get; set; } = null;
+
         public override string Format { get; set; } = "mp3";
         public override string Name => "libmp3lame";
         public string CurrentQualitySettings { get; private set; }
@@ -48,7 +57,9 @@ namespace CryMediaAPI.Encoding.Builders
             {
                 Format = Format,
                 EncoderName = Name,
-                EncoderArguments = $"{CurrentQualitySettings}"
+                EncoderArguments = $"{CurrentQualitySettings}" +
+                    (ChannelCount == null ? "" : $" -ac {ChannelCount}") +
+                    (SampleRate == null ? "" : $" -ar {SampleRate}")
             };
         }
     }
