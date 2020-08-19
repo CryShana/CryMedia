@@ -17,8 +17,8 @@ namespace CryMediaAPI
         /// </summary>
         public static Verbosity LogLevel { get; set; } = Verbosity.Info;
 
-        static readonly Regex CodecRegex = new Regex(@"(?<type>[VAS\.])[F\.][S\.][X\.][B\.][D\.] (?<codec>[a-zA-Z0-9_-]+)\W+(?<description>.*)\n?", RegexOptions.Compiled);
-        static readonly Regex FormatRegex = new Regex(@"(?<type>[D\s][E\s]) (?<format>[a-zA-Z0-9_\-,]+)\W+(?<description>.*)\n?", RegexOptions.Compiled);
+        static readonly Regex CodecRegex = new Regex(@"(?<type>[VAS\.])[F\.][S\.][X\.][B\.][D\.] (?<codec>[a-zA-Z0-9_-]+)\W+(?<description>.*)\n?");
+        static readonly Regex FormatRegex = new Regex(@"(?<type>[DE]{1,2})\s+?(?<format>[a-zA-Z0-9_\-,]+)\W+(?<description>.*)\n?");
 
         /// <summary>
         /// Run given command (arguments) using the given executable name or path
@@ -204,7 +204,7 @@ namespace CryMediaAPI
         public static Dictionary<string, (string Description, MuxingSupport Support)> GetFormats(string ffmpegExecutable = "ffmpeg")
         {
             var data = new Dictionary<string, (string Description, MuxingSupport Support)>();
-            var r = RunCommand(ffmpegExecutable, "-formats -v quiet", true);
+            var r = RunCommand(ffmpegExecutable, "-formats -v quiet -loglevel silent", true);
             var mtc = FormatRegex.Matches(r.output);
             foreach (Match m in mtc)
             {
