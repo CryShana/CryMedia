@@ -128,7 +128,7 @@ namespace CryMediaAPI.Audio
         /// <param name="samples">Number of samples to read in a frame</param>
         public AudioFrame NextFrame(int samples)
         {
-            var frame = new AudioFrame(samples, Metadata.Channels, loadedBitDepth);
+            var frame = new AudioFrame(Metadata.Channels, samples, loadedBitDepth);
             return NextFrame(frame);
         }
 

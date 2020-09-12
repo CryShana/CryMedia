@@ -39,7 +39,7 @@ namespace TestingConsole
             {
                 writer.OpenWrite(true);
 
-                var frame = new AudioFrame(1, audio.Metadata.Channels);
+                var frame = new AudioFrame(1);
                 while (true)
                 {
                     // read next sample
