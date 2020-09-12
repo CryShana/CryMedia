@@ -180,8 +180,8 @@ namespace CryMediaAPI
         public static Dictionary<string, (string Description, MediaType Type)> GetEncoders(string ffmpegExecutable = "ffmpeg")
         {
             var data = new Dictionary<string, (string Description, MediaType Type)>();
-            var r = RunCommand(ffmpegExecutable, "-encoders -v quiet", true);
-            var mtc = CodecRegex.Matches(r.output);
+            var (output, _) = RunCommand(ffmpegExecutable, "-encoders -v quiet", true);
+            var mtc = CodecRegex.Matches(output);
             foreach (Match m in mtc)
             {
                 char t = m.Groups["type"].Value[0];
@@ -192,8 +192,8 @@ namespace CryMediaAPI
         public static Dictionary<string, (string Description, MediaType Type)> GetDecoders(string ffmpegExecutable = "ffmpeg")
         {
             var data = new Dictionary<string, (string Description, MediaType Type)>();
-            var r = RunCommand(ffmpegExecutable, "-decoders -v quiet", true);
-            var mtc = CodecRegex.Matches(r.output);
+            var (output, _) = RunCommand(ffmpegExecutable, "-decoders -v quiet", true);
+            var mtc = CodecRegex.Matches(output);
             foreach (Match m in mtc)
             {
                 char t = m.Groups["type"].Value[0];
@@ -204,8 +204,8 @@ namespace CryMediaAPI
         public static Dictionary<string, (string Description, MuxingSupport Support)> GetFormats(string ffmpegExecutable = "ffmpeg")
         {
             var data = new Dictionary<string, (string Description, MuxingSupport Support)>();
-            var r = RunCommand(ffmpegExecutable, "-formats -v quiet -loglevel silent", true);
-            var mtc = FormatRegex.Matches(r.output);
+            var (output, _) = RunCommand(ffmpegExecutable, "-formats -v quiet -loglevel silent", true);
+            var mtc = FormatRegex.Matches(output);
             foreach (Match m in mtc)
             {
                 string t = m.Groups["type"].Value.Trim();

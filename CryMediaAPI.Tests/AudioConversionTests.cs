@@ -104,8 +104,10 @@ namespace CryMediaAPI.Tests
                 using var reader = new AudioReader(path);
                 await reader.LoadMetadataAsync();
 
-                var encoder = new AACEncoder();
-                encoder.Format = "flv";
+                var encoder = new AACEncoder
+                {
+                    Format = "flv"
+                };
 
                 using (var filestream = File.Create(opath))
                 {

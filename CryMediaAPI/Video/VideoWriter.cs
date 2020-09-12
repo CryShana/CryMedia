@@ -68,7 +68,6 @@ namespace CryMediaAPI.Video
         {
             if (width <= 0 || height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
             if (framerate <= 0) throw new InvalidDataException("Video framerate has to be bigger than 0!");
-            if (destinationStream == null) throw new NullReferenceException("Stream can't be null!");
 
             UseFilename = false;
 
@@ -77,7 +76,7 @@ namespace CryMediaAPI.Video
             Width = width;
             Height = height;
             Framerate = framerate;
-            DestinationStream = destinationStream;
+            DestinationStream = destinationStream ?? throw new NullReferenceException("Stream can't be null!");
             EncoderOptions = encoderOptions ?? new H264Encoder().Create();
         }
 

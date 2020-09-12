@@ -109,8 +109,10 @@ namespace CryMediaAPI.Tests
                 using var reader = new VideoReader(path);
                 await reader.LoadMetadataAsync();
 
-                var encoder = new H264Encoder();
-                encoder.Format = "flv";
+                var encoder = new H264Encoder
+                {
+                    Format = "flv"
+                };
 
                 using (var filestream = File.Create(opath))
                 {

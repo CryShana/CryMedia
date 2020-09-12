@@ -67,8 +67,6 @@ namespace CryMediaAPI.Audio
         {
             if (channels <= 0 || sampleRate <= 0) throw new InvalidDataException("Channels/Sample rate have to be bigger than 0!");
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
-            if (destinationStream == null) throw new NullReferenceException("Stream can't be null!");
-
             UseFilename = false;
             ffmpeg = ffmpegExecutable;
 
@@ -76,7 +74,7 @@ namespace CryMediaAPI.Audio
             BitDepth = bitDepth;
             SampleRate = sampleRate;
 
-            DestinationStream = destinationStream;
+            DestinationStream = destinationStream ?? throw new NullReferenceException("Stream can't be null!");
             EncoderOptions = encoderOptions ?? new MP3Encoder().Create();
         }
 

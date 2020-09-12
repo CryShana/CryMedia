@@ -123,11 +123,10 @@ namespace CryMediaAPI.Video
         {
             if (video_width <= 0 || video_height <= 0) throw new InvalidDataException("Video frame dimensions have to be bigger than 0 pixels!");
             if (video_framerate <= 0) throw new InvalidDataException("Video framerate has to be bigger than 0!");
-            if (outputStream == null) throw new NullReferenceException("Stream can't be null!");
             if (audio_channels <= 0 || audio_sampleRate <= 0) throw new InvalidDataException("Channels/Sample rate have to be bigger than 0!");
             if (audio_bitDepth != 16 && audio_bitDepth != 24 && audio_bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
 
-            DestinationStream = outputStream;
+            DestinationStream = outputStream ?? throw new NullReferenceException("Stream can't be null!");
             UseFilename = false;
 
             VideoWidth = video_width;

@@ -99,8 +99,10 @@ namespace CryMediaAPI.Tests
                 var vstream = vreader.Metadata.GetFirstVideoStream();
                 var astream = areader.Metadata.GetFirstAudioStream();
 
-                var encoder = new H264Encoder();
-                encoder.Format = "flv";
+                var encoder = new H264Encoder
+                {
+                    Format = "flv"
+                };
 
                 using (var filestream = File.Create(opath))
                 {
