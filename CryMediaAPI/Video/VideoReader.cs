@@ -14,8 +14,17 @@ namespace CryMediaAPI.Video
     {
         string ffmpeg, ffprobe;
 
+        /// <summary>
+        /// Current frame position within the loaded video file
+        /// </summary>
         public long CurrentFrameOffset { get; private set; }
+        /// <summary>
+        /// True if metadata loaded successfully
+        /// </summary>
         public bool LoadedMetadata { get; private set; }
+        /// <summary>
+        /// Video metadata
+        /// </summary>
         public VideoMetadata Metadata { get; private set; }
 
 
@@ -151,6 +160,9 @@ namespace CryMediaAPI.Video
             return -1;
         }
 
+        /// <summary>
+        /// Diposes the DataStream
+        /// </summary>
         public void Dispose()
         {
             DataStream?.Dispose();

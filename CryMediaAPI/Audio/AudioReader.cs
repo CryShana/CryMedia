@@ -14,8 +14,17 @@ namespace CryMediaAPI.Audio
         string ffmpeg, ffprobe;
         int loadedBitDepth = 16;
 
+        /// <summary>
+        /// Current sample position within the loaded audio file
+        /// </summary>
         public long CurrentSampleOffset { get; private set; }
-        public bool MetadataLoaded { get; private set; }      
+        /// <summary>
+        /// True if metadata loaded successfully
+        /// </summary>
+        public bool MetadataLoaded { get; private set; }    
+        /// <summary>
+        /// Audio metadata
+        /// </summary>
         public AudioMetadata Metadata { get; private set; }
 
         /// <summary>
@@ -146,6 +155,9 @@ namespace CryMediaAPI.Audio
             return success ? frame : null;
         }
 
+        /// <summary>
+        /// Diposes the DataStream
+        /// </summary>
         public void Dispose()
         {
             DataStream?.Dispose();

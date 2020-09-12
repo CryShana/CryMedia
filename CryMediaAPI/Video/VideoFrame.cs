@@ -12,9 +12,18 @@ namespace CryMediaAPI.Video
         int size, offset = 0;
 
         byte[] frameBuffer;
+        /// <summary>
+        /// Raw video data in RGB24 pixel format
+        /// </summary>
         public Memory<byte> RawData { get; }
 
+        /// <summary>
+        /// Video width in pixels
+        /// </summary>
         public int Width { get; }
+        /// <summary>
+        /// Video height in pixels
+        /// </summary>
         public int Height { get; }
 
         /// <summary>
@@ -57,6 +66,7 @@ namespace CryMediaAPI.Video
         /// </summary>
         /// <param name="output">Output image</param>
         /// <param name="encoder">Encoder for image ('png', 'libwebp')</param>
+        /// <param name="extraParameters">Extra FFmpeg output parameters to be passed</param>
         /// <param name="ffmpegExecutable">Name or path to the ffmpeg executable</param>
         public void Save(string output, string encoder = "png", string extraParameters = "", string ffmpegExecutable = "ffmpeg")
         {
@@ -83,6 +93,9 @@ namespace CryMediaAPI.Video
             return RawData.Slice(index, length * 3);
         }
 
+        /// <summary>
+        /// Clears the frame buffer
+        /// </summary>
         public void Dispose()
         {
             frameBuffer = null;
