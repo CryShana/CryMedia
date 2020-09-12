@@ -15,7 +15,7 @@ namespace CryMediaAPI.Video
         /// <summary>
         /// Raw video data in RGB24 pixel format
         /// </summary>
-        public Memory<byte> RawData { get; }
+        public Memory<byte> RawData { get; private set; }
 
         /// <summary>
         /// Video width in pixels
@@ -61,6 +61,12 @@ namespace CryMediaAPI.Video
                 }
 
                 offset += r;
+            }
+
+            // Adjust RawData length when changed
+            if (RawData.Length != offset)
+            {
+                RawData = frameBuffer.AsMemory().Slice(0, offset);
             }
 
             return true;
