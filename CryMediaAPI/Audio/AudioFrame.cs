@@ -11,13 +11,28 @@ namespace CryMediaAPI.Audio
     {     
         int size, offset = 0;
 
+        /// <summary>
+        /// Number of channels
+        /// </summary>
         public int Channels { get; }
+        /// <summary>
+        /// Number of audio samples this frame can contain
+        /// </summary>
         public int SampleCount { get; }
+        /// <summary>
+        /// Bit depth (Bytes per sample)
+        /// </summary>
         public int BytesPerSample { get; }
+        /// <summary>
+        /// Number of loaded audio samples when calling Load()
+        /// </summary>
         public int LoadedSamples { get; private set; }
 
 
         byte[] frameBuffer;
+        /// <summary>
+        /// Raw audio data in signed PCM format
+        /// </summary>
         public Memory<byte> RawData { get; }
 
         /// <summary>
@@ -71,9 +86,12 @@ namespace CryMediaAPI.Audio
             return RawData.Slice(i, BytesPerSample);
         }
 
+        /// <summary>
+        /// Clears the frame buffer
+        /// </summary>
         public void Dispose()
         {
-            frameBuffer = null;
+            frameBuffer = null;        
         }
     }
 }
