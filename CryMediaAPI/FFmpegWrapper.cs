@@ -16,6 +16,10 @@ namespace CryMediaAPI
         /// This may affect the progress tracker that depends on displayed stats. Default is 'info'.
         /// </summary>
         public static Verbosity LogLevel { get; set; } = Verbosity.Info;
+        /// <summary>
+        /// FFmpeg banner setting. This sets the 'hide_banner' parameter on FFmpeg. Default is 'true' to hide the banner.
+        /// </summary>
+        public static bool HideFFmpegBanner { get; set; } = true;
 
         static readonly Regex CodecRegex = new Regex(@"(?<type>[VAS\.])[F\.][S\.][X\.][B\.][D\.] (?<codec>[a-zA-Z0-9_-]+)\W+(?<description>.*)\n?");
         static readonly Regex FormatRegex = new Regex(@"(?<type>[DE]{1,2})\s+?(?<format>[a-zA-Z0-9_\-,]+)\W+(?<description>.*)\n?");
@@ -35,7 +39,10 @@ namespace CryMediaAPI
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
-                Arguments = $"-loglevel {LogLevel.ToString().ToLowerInvariant()} {command}"
+                Arguments = 
+                    $"-loglevel {LogLevel.ToString().ToLowerInvariant()} " +
+                    $"{(HideFFmpegBanner ? "-hide_banner" : "")} " +
+                    $"{command}"
             });
 
             string output = "", error = "";
@@ -62,7 +69,10 @@ namespace CryMediaAPI
                 UseShellExecute = false,
                 RedirectStandardError = !showOutput,
                 CreateNoWindow = !showOutput,
-                Arguments = $"-loglevel {LogLevel.ToString().ToLowerInvariant()} {command}"
+                Arguments = 
+                    $"-loglevel {LogLevel.ToString().ToLowerInvariant()} " +
+                    $"{(HideFFmpegBanner ? "-hide_banner" : "")} " +
+                    $"{command}"
             });
 
             if (!showOutput)
@@ -89,7 +99,10 @@ namespace CryMediaAPI
                 RedirectStandardError = !showOutput,
                 RedirectStandardOutput = true,
                 CreateNoWindow = !showOutput,
-                Arguments = $"-loglevel {LogLevel.ToString().ToLowerInvariant()} {command}"
+                Arguments = 
+                    $"-loglevel {LogLevel.ToString().ToLowerInvariant()} " +
+                    $"{(HideFFmpegBanner ? "-hide_banner" : "")} " +
+                    $"{command}"
             });
 
             if (!showOutput) process.BeginErrorReadLine();
@@ -121,7 +134,10 @@ namespace CryMediaAPI
                 RedirectStandardInput = true,
                 RedirectStandardError = !showOutput,
                 CreateNoWindow = !showOutput,
-                Arguments = $"-loglevel {LogLevel.ToString().ToLowerInvariant()} {command}"
+                Arguments = 
+                    $"-loglevel {LogLevel.ToString().ToLowerInvariant()} " +
+                    $"{(HideFFmpegBanner ? "-hide_banner" : "")} " +
+                    $"{command}"
             });
 
             if (!showOutput)
@@ -157,7 +173,10 @@ namespace CryMediaAPI
                 RedirectStandardError = !showOutput,
                 RedirectStandardOutput = true,
                 CreateNoWindow = !showOutput,
-                Arguments = $"-loglevel {LogLevel.ToString().ToLowerInvariant()} {command}"
+                Arguments = 
+                    $"-loglevel {LogLevel.ToString().ToLowerInvariant()} " +
+                    $"{(HideFFmpegBanner ? "-hide_banner" : "")} " +
+                    $"{command}"
             });
 
             if (!showOutput)
