@@ -75,7 +75,7 @@ namespace CryMediaAPI.Video
                             int.Parse(videoStream.BitRate);
 
                         metadata.BitDepth = videoStream.BitsPerRawSample == null ? 
-                            tryParseBitDepth(videoStream.PixFmt) : 
+                            TryParseBitDepth(videoStream.PixFmt) : 
                             int.Parse(videoStream.BitsPerRawSample);
 
                         metadata.Duration = videoStream.Duration == null ? 
@@ -152,7 +152,7 @@ namespace CryMediaAPI.Video
         }
 
         static Regex bitRateSimpleRgx = new Regex(@"\D(\d+?)[bl]e", RegexOptions.Compiled);
-        int tryParseBitDepth(string pix_fmt)
+        int TryParseBitDepth(string pix_fmt)
         {
             var match = bitRateSimpleRgx.Match(pix_fmt);
             if (match.Success) return int.Parse(match.Groups[1].Value);
