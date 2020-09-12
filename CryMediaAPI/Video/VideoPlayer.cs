@@ -25,24 +25,26 @@ namespace CryMediaAPI.Video
         /// <summary>
         /// Play video
         /// </summary>
-        public void Play()
+        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
+        public void Play(string extraInputParameters = "")
         {
             if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
-            FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"");
+            FFmpegWrapper.RunCommand(ffplay, $"{extraInputParameters} -i \"{Filename}\"");
         }
 
         /// <summary>
         /// Play video in background and return the process associated with it
         /// </summary>
         /// <param name="runPureBackground">Detach the player from this VideoPlayer control. Player won't be killed on disposing.</param>
-        public Process PlayInBackground(bool runPureBackground = false)
+        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
+        public Process PlayInBackground(bool runPureBackground = false, string extraInputParameters = "")
         {
             if (!runPureBackground && OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
-            FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"", out Process p);
+            FFmpegWrapper.OpenOutput(ffplay, $"{extraInputParameters} -i \"{Filename}\"", out Process p);
             if (!runPureBackground) ffplayp = p;
             return ffplayp;
         }
@@ -53,8 +55,10 @@ namespace CryMediaAPI.Video
         /// <param name="width">Video frame width</param>
         /// <param name="height">Video frame height</param>
         /// <param name="framerateFrequency">Video framerate (frequency form)</param>
+        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
         /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
-        public void OpenWrite(int width, int height, string framerateFrequency, bool showFFplayOutput = false)
+        public void OpenWrite(int width, int height, string framerateFrequency, 
+            string extraInputParameters = "", bool showFFplayOutput = false)
         {
             if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
             try
