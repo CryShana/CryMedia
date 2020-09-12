@@ -25,25 +25,27 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Play audio
         /// </summary>
-        public void Play(bool showWindow = false)
+        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed (example: -probesize 32)</param>
+        public void Play(string extraInputParameters = "", bool showWindow = false)
         {
             if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing samples!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
-            FFmpegWrapper.RunCommand(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -nodisp"));
+            FFmpegWrapper.RunCommand(ffplay, $"{extraInputParameters} -i \"{Filename}\"" + (showWindow ? "" : " -nodisp"));
         }
 
         /// <summary>
         /// Play audio in background and return the process associated with it
         /// </summary>
+        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed (example: -probesize 32)</param>
         /// <param name="showWindow">Show player window</param>
         /// <param name="runPureBackground">Detach the player from this AudioPlayer control. Player won't be killed on disposing.</param>
-        public Process PlayInBackground(bool showWindow = false, bool runPureBackground = false)
+        public Process PlayInBackground(string extraInputParameters = "", bool showWindow = false, bool runPureBackground = false)
         {
             if (!runPureBackground && OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing samples!");
             if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
 
-            FFmpegWrapper.OpenOutput(ffplay, $"-i \"{Filename}\"" + (showWindow ? "" : " -nodisp"), out Process p);
+            FFmpegWrapper.OpenOutput(ffplay, $"{extraInputParameters} -i \"{Filename}\"" + (showWindow ? "" : " -nodisp"), out Process p);
             if (!runPureBackground) ffplayp = p;
             return ffplayp;
         }
@@ -54,9 +56,11 @@ namespace CryMediaAPI.Audio
         /// <param name="sampleRate">Sample rate</param>
         /// <param name="channels">Number of channels</param>
         /// <param name="bitDepth">Bits per sample (16, 24, 32)</param>
+        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed (example: -probesize 32)</param>
         /// <param name="showWindow">Show player graphical window</param>
         /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
-        public void OpenWrite(int sampleRate, int channels, int bitDepth = 16, bool showWindow = false, bool showFFplayOutput = false)
+        public void OpenWrite(int sampleRate, int channels, int bitDepth = 16, string extraInputParameters = "",
+            bool showWindow = false, bool showFFplayOutput = false)
         {
             if (bitDepth != 16 && bitDepth != 24 && bitDepth != 32) throw new InvalidOperationException("Acceptable bit depths are 16, 24 and 32");
             if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing samples!");
@@ -66,7 +70,7 @@ namespace CryMediaAPI.Audio
             }
             catch { }
 
-            InputDataStream = FFmpegWrapper.OpenInput(ffplay, $"-f s{bitDepth}le -channels {channels} -sample_rate {sampleRate} -i -" 
+            InputDataStream = FFmpegWrapper.OpenInput(ffplay, $"{extraInputParameters} -f s{bitDepth}le -channels {channels} -sample_rate {sampleRate} -i -" 
                 + (showWindow ? "" : " -nodisp"), 
                 out ffplayp, showFFplayOutput);
 
