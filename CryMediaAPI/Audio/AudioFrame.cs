@@ -67,7 +67,12 @@ namespace CryMediaAPI.Audio
             while (offset < size)
             {
                 var r = str.Read(frameBuffer, offset, size - offset);
-                if (r <= 0) return false;
+                if (r <= 0)
+                {
+                    if (offset == 0) return false;
+                    else break;
+                }
+
                 offset += r;
             }
 
