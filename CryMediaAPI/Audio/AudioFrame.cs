@@ -33,7 +33,7 @@ namespace CryMediaAPI.Audio
         /// <summary>
         /// Raw audio data in signed PCM format
         /// </summary>
-        public Memory<byte> RawData { get; }
+        public Memory<byte> RawData { get; private set; }
 
         /// <summary>
         /// Creates an empty audio frame with fixed sample count and given bit depth using signed PCM format.
@@ -77,6 +77,13 @@ namespace CryMediaAPI.Audio
             }
 
             LoadedSamples = offset / (BytesPerSample * Channels);
+
+            // Adjust RawData length when changed
+            if (RawData.Length != offset)
+            {
+                RawData = frameBuffer.AsMemory().Slice(0, offset);
+            }
+
             return true;
         }
 
