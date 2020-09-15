@@ -139,7 +139,7 @@ namespace CryMediaAPI.Video.Models
         public string CompatibleBrands { get; set; }
 
         [JsonPropertyName("creation_time")]
-        public DateTimeOffset CreationTime { get; set; }
+        public string CreationTime { get; set; }
 
         [JsonPropertyName("encoder")]
         public string Encoder { get; set; }
