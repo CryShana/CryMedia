@@ -163,7 +163,7 @@ namespace CryMediaAPI.BaseClasses
     public class StreamTags
     {
         [JsonPropertyName("creation_time")]
-        public DateTimeOffset CreationTime { get; set; }
+        public string CreationTime { get; set; }
 
         [JsonPropertyName("language")]
         public string Language { get; set; }
