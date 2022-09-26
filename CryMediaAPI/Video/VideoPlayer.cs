@@ -3,125 +3,124 @@ using System.IO;
 using System.Diagnostics;
 using CryMediaAPI.BaseClasses;
 
-namespace CryMediaAPI.Video
+namespace CryMediaAPI.Video;
+
+public class VideoPlayer : MediaWriter<VideoFrame>, IDisposable
 {
-    public class VideoPlayer : MediaWriter<VideoFrame>, IDisposable
+    string ffplay;
+    Process ffplayp;
+
+    /// <summary>
+    /// Used for playing video data
+    /// </summary>
+    /// <param name="input">Input video to play (can be left empty if planning on playing frames directly)</param>
+    /// <param name="ffplayExecutable">Name or path to the ffplay executable</param> 
+    public VideoPlayer(string input = null, string ffplayExecutable = "ffplay")
     {
-        string ffplay;
-        Process ffplayp;
+        ffplay = ffplayExecutable;
 
-        /// <summary>
-        /// Used for playing video data
-        /// </summary>
-        /// <param name="input">Input video to play (can be left empty if planning on playing frames directly)</param>
-        /// <param name="ffplayExecutable">Name or path to the ffplay executable</param> 
-        public VideoPlayer(string input = null, string ffplayExecutable = "ffplay")
+        Filename = input;
+    }
+
+    /// <summary>
+    /// Play video
+    /// </summary>
+    /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
+    public void Play(string extraInputParameters = "")
+    {
+        if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
+        if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
+
+        FFmpegWrapper.RunCommand(ffplay, $"{extraInputParameters} -i \"{Filename}\"");
+    }
+
+    /// <summary>
+    /// Play video in background and return the process associated with it
+    /// </summary>
+    /// <param name="runPureBackground">Detach the player from this VideoPlayer control. Player won't be killed on disposing.</param>
+    /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
+    public Process PlayInBackground(bool runPureBackground = false, string extraInputParameters = "")
+    {
+        if (!runPureBackground && OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
+        if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
+
+        FFmpegWrapper.OpenOutput(ffplay, $"{extraInputParameters} -i \"{Filename}\"", out Process p);
+        if (!runPureBackground) ffplayp = p;
+        return ffplayp;
+    }
+
+    /// <summary>
+    /// Open player for writing frames for playing.
+    /// </summary>
+    /// <param name="width">Video frame width</param>
+    /// <param name="height">Video frame height</param>
+    /// <param name="framerateFrequency">Video framerate (frequency form)</param>
+    /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
+    /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
+    public void OpenWrite(int width, int height, string framerateFrequency, 
+        string extraInputParameters = "", bool showFFplayOutput = false)
+    {
+        if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
+        try
         {
-            ffplay = ffplayExecutable;
-
-            Filename = input;
+            if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
         }
+        catch { }
 
-        /// <summary>
-        /// Play video
-        /// </summary>
-        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
-        public void Play(string extraInputParameters = "")
+        InputDataStream = FFmpegWrapper.OpenInput(ffplay, $"-f rawvideo -video_size {width}:{height} -framerate {framerateFrequency} -pixel_format rgb24 -i -",
+            out ffplayp, showFFplayOutput);
+
+        OpenedForWriting = true;
+    }
+
+    /// <summary>
+    /// Close player for writing frames.
+    /// </summary>
+    public void CloseWrite()
+    {
+        if (!OpenedForWriting) throw new InvalidOperationException("Player is not opened for writing frames!");
+
+        try
         {
-            if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
-            if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
+            try
+            {
+                if (!ffplayp.HasExited) ffplayp.Kill();
+            }
+            catch { }
 
-            FFmpegWrapper.RunCommand(ffplay, $"{extraInputParameters} -i \"{Filename}\"");
+            InputDataStream.Dispose();
         }
-
-        /// <summary>
-        /// Play video in background and return the process associated with it
-        /// </summary>
-        /// <param name="runPureBackground">Detach the player from this VideoPlayer control. Player won't be killed on disposing.</param>
-        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
-        public Process PlayInBackground(bool runPureBackground = false, string extraInputParameters = "")
+        finally
         {
-            if (!runPureBackground && OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
-            if (string.IsNullOrEmpty(Filename)) throw new InvalidOperationException("No filename was specified!");
-
-            FFmpegWrapper.OpenOutput(ffplay, $"{extraInputParameters} -i \"{Filename}\"", out Process p);
-            if (!runPureBackground) ffplayp = p;
-            return ffplayp;
+            OpenedForWriting = false;
         }
+    }
 
-        /// <summary>
-        /// Open player for writing frames for playing.
-        /// </summary>
-        /// <param name="width">Video frame width</param>
-        /// <param name="height">Video frame height</param>
-        /// <param name="framerateFrequency">Video framerate (frequency form)</param>
-        /// <param name="extraInputParameters">Extra FFmpeg input parameters to be passed</param>
-        /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
-        public void OpenWrite(int width, int height, string framerateFrequency, 
-            string extraInputParameters = "", bool showFFplayOutput = false)
+    /// <summary>
+    /// Get stream for writing and playing video in custom format.
+    /// </summary>
+    /// <param name="format">Custom video format</param>
+    /// <param name="arguments">Custom FFmpeg arguments for the specified video format</param>
+    /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
+    public static Stream GetStreamForWriting(string format, string arguments, out Process ffplayProcess,
+        bool showFFplayOutput = false, string ffplayExecutable = "ffplay")
+    {
+        var str = FFmpegWrapper.OpenInput(ffplayExecutable, $"-f {format} {arguments} -i -",
+            out ffplayProcess, showFFplayOutput);
+
+        return str;
+    }
+
+    public void Dispose()
+    {
+        if (OpenedForWriting) CloseWrite();
+        else
         {
-            if (OpenedForWriting) throw new InvalidOperationException("Player is already opened for writing frames!");
             try
             {
                 if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
             }
             catch { }
-
-            InputDataStream = FFmpegWrapper.OpenInput(ffplay, $"-f rawvideo -video_size {width}:{height} -framerate {framerateFrequency} -pixel_format rgb24 -i -",
-                out ffplayp, showFFplayOutput);
-
-            OpenedForWriting = true;
-        }
-
-        /// <summary>
-        /// Close player for writing frames.
-        /// </summary>
-        public void CloseWrite()
-        {
-            if (!OpenedForWriting) throw new InvalidOperationException("Player is not opened for writing frames!");
-
-            try
-            {
-                try
-                {
-                    if (!ffplayp.HasExited) ffplayp.Kill();
-                }
-                catch { }
-
-                InputDataStream.Dispose();
-            }
-            finally
-            {
-                OpenedForWriting = false;
-            }
-        }
-
-        /// <summary>
-        /// Get stream for writing and playing video in custom format.
-        /// </summary>
-        /// <param name="format">Custom video format</param>
-        /// <param name="arguments">Custom FFmpeg arguments for the specified video format</param>
-        /// <param name="showFFplayOutput">Show FFplay output for debugging purposes.</param>
-        public static Stream GetStreamForWriting(string format, string arguments, out Process ffplayProcess,
-            bool showFFplayOutput = false, string ffplayExecutable = "ffplay")
-        {
-            var str = FFmpegWrapper.OpenInput(ffplayExecutable, $"-f {format} {arguments} -i -",
-                out ffplayProcess, showFFplayOutput);
-
-            return str;
-        }
-
-        public void Dispose()
-        {
-            if (OpenedForWriting) CloseWrite();
-            else
-            {
-                try
-                {
-                    if (ffplayp != null && !ffplayp.HasExited) ffplayp.Kill();
-                }
-                catch { }
-            }
         }
     }
 }
